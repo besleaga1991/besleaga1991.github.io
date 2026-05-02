@@ -1,70 +1,164 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ro">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Under Development</title>
+    <title>Website</title>
     <style>
-        /* Fundal modern și centrare totală */
-        body {
+        :root {
+            --stripe-blue: #6772e5;
+            --text-dark: #32325d;
+            --text-light: #6b7c93;
+            --bg-gray: #f6f9fc;
+        }
+
+        body, html {
+            height: 100%;
             margin: 0;
-            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-gray);
+        }
+
+        /* Centrare perfecta pe mijloc */
+        .wrapper {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #f4f7f6; /* Gri foarte deschis */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
-        /* Cardul alb central */
-        .card {
-            background-color: #ffffff;
-            padding: 40px 60px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        .payment-card {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(50,50,93,.1), 0 5px 15px rgba(0,0,0,.07);
             text-align: center;
-            max-width: 90%;
+            max-width: 400px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        /* Stil pentru textul principal */
-        h1 {
-            color: #333;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
+        h1 { color: var(--text-dark); font-size: 24px; margin-bottom: 10px; }
+        .price { font-size: 32px; font-weight: 800; color: var(--stripe-blue); display: block; margin-bottom: 20px; }
+        
+        .stripe-button {
+            background-color: var(--stripe-blue);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 8px;
+            text-decoration: none;
             font-weight: 600;
+            display: block;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(50,50,93,.11);
         }
 
-        /* Stil pentru copyright */
-        .footer {
-            color: #777;
-            font-size: 0.9rem;
-            border-top: 1px solid #eee;
-            padding-top: 20px;
+        .stripe-button:hover {
+            background-color: #5469d4;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(50,50,93,.1);
+        }
+
+        /* Stil link-uri sub card */
+        .footer-links {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .footer-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 13px;
+            margin: 0 10px;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--stripe-blue);
+            text-decoration: underline;
+        }
+
+        .copyright {
             margin-top: 20px;
+            font-size: 12px;
+            color: #aab7c4;
         }
 
-        /* O mică animație la încărcare */
-        .card {
-            animation: fadeIn 0.8s ease-in-out;
+        /* Modal simplu pentru texte legale */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 12px;
+            max-height: 70vh;
+            overflow-y: auto;
         }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1>This website is under development</h1>
+<div class="wrapper">
+    <div class="payment-card">
+        <h1>Website Basic</h1>
+        <span class="price">3.000,00 RON</span>
+        <p style="color: var(--text-light); margin-bottom: 30px;">Servicii profesionale de dezvoltare web</p>
         
-        <div class="footer">
-            &copy; 2026 Beșleagă Alexandru Marian
+        <a href="https://buy.stripe.com/8x2eVcgsY5cL1fH1iz4Ja00" class="stripe-button">
+            Plătește Acum
+        </a>
+    </div>
+
+    <div class="footer-links">
+        <a href="#" onclick="showLegal('terms')">Termeni și Condiții</a>
+        <a href="#" onclick="showLegal('privacy')">Confidențialitate</a>
+        
+        <div class="copyright" id="copyright-notice">
+            <!-- Generat de JS -->
         </div>
     </div>
+</div>
+
+<!-- Modal pentru texte -->
+<div id="legalModal" class="modal" onclick="this.style.display='none'">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div id="legalText"></div>
+        <button onclick="document.getElementById('legalModal').style.display='none'" style="margin-top: 20px; cursor: pointer;">Închide</button>
+    </div>
+</div>
+
+<script>
+    // Generare Copyright
+    const year = 2026;
+    const name = "Beșleagă Alexandru Marian";
+    document.getElementById('copyright-notice').innerText = `© ${year} ${name}. Toate drepturile rezervate.`;
+
+    // Funcție afișare Termeni/Privacy
+    function showLegal(type) {
+        const modal = document.getElementById('legalModal');
+        const content = document.getElementById('legalText');
+        
+        if(type === 'terms') {
+            content.innerHTML = "<h2>Termeni și Condiții</h2><p>Prin plata serviciului, acceptați începerea lucrului. Termen de livrare: 14-21 zile. Serviciile sunt furnizate de Beșleagă Alexandru Marian în regim Solo Proprietor.</p>";
+        } else {
+            content.innerHTML = "<h2>Politică de Confidențialitate</h2><p>Datele sunt procesate securizat de Stripe. Nu stocăm informații bancare. E-mailul dvs. este folosit doar pentru facturare.</p>";
+        }
+        
+        modal.style.display = 'block';
+    }
+</script>
 
 </body>
 </html>
-
