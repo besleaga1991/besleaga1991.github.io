@@ -7,8 +7,86 @@
 
 const year = 2026;
 const name = "Beșleagă Alexandru Marian";
-document.getElementById('copyright-notice').innerText = `© ${year} ${name}. Toate drepturile rezervate.`;
 
+// Copyright notice
+if(document.getElementById('copyright-notice')) {
+    document.getElementById('copyright-notice').innerText = `© ${year} ${name}. Toate drepturile rezervate.`;
+}
+
+// NAVIGARE
+function openEditor() {
+    document.getElementById('main-view').style.display = 'none';
+    document.getElementById('editor-view').style.display = 'flex';
+}
+
+function closeEditor() {
+    document.getElementById('editor-view').style.display = 'none';
+    document.getElementById('main-view').style.display = 'flex';
+}
+
+// SALVARE DATE
+function saveToLocal() {
+    const section = document.getElementById('section-select').value.trim();
+    const text = document.getElementById('section-text').value;
+    
+    if (!section) {
+        alert('Te rugăm să numești secțiunea!');
+        return;
+    }
+
+    let storage = JSON.parse(localStorage.getItem('websiteDrafts') || '{}');
+    storage[section] = text;
+    localStorage.setItem('websiteDrafts', JSON.stringify(storage));
+    alert(`Salvat: ${section}`);
+}
+
+// Incarcare automata
+document.getElementById('section-select')?.addEventListener('input', function() {
+    let storage = JSON.parse(localStorage.getItem('websiteDrafts') || '{}');
+    document.getElementById('section-text').value = storage[this.value] || '';
+});
+
+// DESCARCARE PDF (CORECȚIE TOTALĂ)
+function downloadPDF() {
+    // Încercăm să găsim librăria în orice format (UMD sau Global)
+    const jsPDFLib = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : (window.jsPDF ? window.jsPDF : null);
+
+    if (!jsPDFLib) {
+        alert("Librăria încă se încarcă. Verifică dacă ai conexiune la internet sau dacă fișierul index.html conține link-ul către jspdf.");
+        return;
+    }
+
+    const doc = new jsPDFLib();
+    const storage = JSON.parse(localStorage.getItem('websiteDrafts') || '{}');
+
+    if (Object.keys(storage).length === 0) {
+        alert("Nu ai conținut salvat pentru export!");
+        return;
+    }
+
+    let y = 20;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("CONȚINUT WEBSITE - " + name.toUpperCase(), 20, y);
+    y += 20;
+
+    for (const [key, val] of Object.entries(storage)) {
+        if (y > 270) { doc.addPage(); y = 20; }
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text(key.toUpperCase() + ":", 20, y);
+        y += 10;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        const lines = doc.splitTextToSize(val, 170);
+        doc.text(lines, 20, y);
+        y += (lines.length * 7) + 15;
+    }
+
+    doc.save("Continut_Website.pdf");
+}
+
+// FUNCTII ORIGINALE (TEXTE INTACTE)
 function showLegal(type) {
     const modal = document.getElementById('legalModal');
     const content = document.getElementById('legalText');
@@ -73,4 +151,3 @@ function closeModal() {
     document.getElementById('legalModal').style.display = 'none';
     document.body.style.overflow = 'auto';
 }
-

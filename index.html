@@ -9,12 +9,36 @@
 <body>
 
 <div class="wrapper">
+    <!-- Card Conținut -->
+    <div class="payment-card" style="margin-bottom: 20px;">
+        <h1>Website</h1>
+        <span class="price">Conținut</span>
+        <div style="color: var(--text-light); text-align: left; font-size: 14px; line-height: 1.6;">
+            <p>Această secție a site-ului îți permite să-ți scrii conținutul singur și să stabilești structura website-ului tău.</p>
+            <p>Poți începe redactarea pentru:</p>
+            <ul style="padding-left: 20px; margin-bottom: 20px;">
+                <li><strong>Meniu</strong> (paginile dorite)</li>
+                <li><strong>Conținutul de Body</strong> (textele principale)</li>
+                <li><strong>Termenii și Condițiile</strong></li>
+                <li><strong>Politica de Confidențialitate</strong></li>
+            </ul>
+            <p style="background: #f0f4f8; padding: 10px; border-radius: 8px; border-left: 4px solid var(--stripe-blue); margin-bottom: 20px;">
+                <strong>Notă:</strong> Întreg conținutul se trimite pe email imediat după finalizarea plății, moment în care se va demara procesul de încărcare și publicare a website-ului online.
+            </p>
+
+            <!-- Buton cu culoarea Stripe Blue (identic cu comanda) -->
+            <a href="redactare.html" class="stripe-button">
+                Începeți redactarea
+            </a>
+        </div>
+    </div>
+
+    <!-- Card Website Basic -->
     <div class="payment-card">
         <h1>Website Basic</h1>
         <span class="price">3.000,00 RON</span>
         <p style="color: var(--text-light); margin-bottom: 30px;">Servicii profesionale de dezvoltare web</p>
-        
-        <a href="https://buy.stripe.com/8x2eVcgsY5cL1fH1iz4Ja00" class="stripe-button">
+        <a href="https://stripe.com" class="stripe-button">
             Comanda
         </a>
     </div>
@@ -23,7 +47,6 @@
         <a href="javascript:void(0)" onclick="showLegal('terms')">Termeni și Condiții</a>
         <a href="javascript:void(0)" onclick="showLegal('privacy')">Politică de Confidențialitate</a>
         <a href="javascript:void(0)" onclick="showLegal('contact')">Contact</a>
-        
         <div class="copyright" id="copyright-notice"></div>
     </div>
 </div>
