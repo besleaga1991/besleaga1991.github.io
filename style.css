@@ -37,31 +37,6 @@ body, html {
     flex-direction: column;
 }
 
-/* Stiluri Editor (identice cu cardul) */
-.editor-field {
-    width: 100%;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #e6ebf1;
-    font-family: inherit;
-    color: var(--text-dark);
-    font-size: 15px;
-    box-sizing: border-box;
-    margin-bottom: 15px;
-    outline: none;
-}
-
-.editor-field::placeholder {
-    color: #aab7c4;
-}
-
-.textarea-field {
-    height: 250px;
-    resize: none;
-    text-align: left;
-    line-height: 1.6;
-}
-
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }

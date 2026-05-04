@@ -13,80 +13,6 @@ if(document.getElementById('copyright-notice')) {
     document.getElementById('copyright-notice').innerText = `© ${year} ${name}. Toate drepturile rezervate.`;
 }
 
-// NAVIGARE
-function openEditor() {
-    document.getElementById('main-view').style.display = 'none';
-    document.getElementById('editor-view').style.display = 'flex';
-}
-
-function closeEditor() {
-    document.getElementById('editor-view').style.display = 'none';
-    document.getElementById('main-view').style.display = 'flex';
-}
-
-// SALVARE DATE
-function saveToLocal() {
-    const section = document.getElementById('section-select').value.trim();
-    const text = document.getElementById('section-text').value;
-    
-    if (!section) {
-        alert('Te rugăm să numești secțiunea!');
-        return;
-    }
-
-    let storage = JSON.parse(localStorage.getItem('websiteDrafts') || '{}');
-    storage[section] = text;
-    localStorage.setItem('websiteDrafts', JSON.stringify(storage));
-    alert(`Salvat: ${section}`);
-}
-
-// Incarcare automata
-document.getElementById('section-select')?.addEventListener('input', function() {
-    let storage = JSON.parse(localStorage.getItem('websiteDrafts') || '{}');
-    document.getElementById('section-text').value = storage[this.value] || '';
-});
-
-// DESCARCARE PDF (CORECȚIE TOTALĂ)
-function downloadPDF() {
-    // Încercăm să găsim librăria în orice format (UMD sau Global)
-    const jsPDFLib = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : (window.jsPDF ? window.jsPDF : null);
-
-    if (!jsPDFLib) {
-        alert("Librăria încă se încarcă. Verifică dacă ai conexiune la internet sau dacă fișierul index.html conține link-ul către jspdf.");
-        return;
-    }
-
-    const doc = new jsPDFLib();
-    const storage = JSON.parse(localStorage.getItem('websiteDrafts') || '{}');
-
-    if (Object.keys(storage).length === 0) {
-        alert("Nu ai conținut salvat pentru export!");
-        return;
-    }
-
-    let y = 20;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("CONȚINUT WEBSITE - " + name.toUpperCase(), 20, y);
-    y += 20;
-
-    for (const [key, val] of Object.entries(storage)) {
-        if (y > 270) { doc.addPage(); y = 20; }
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.text(key.toUpperCase() + ":", 20, y);
-        y += 10;
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(11);
-        const lines = doc.splitTextToSize(val, 170);
-        doc.text(lines, 20, y);
-        y += (lines.length * 7) + 15;
-    }
-
-    doc.save("Continut_Website.pdf");
-}
-
-// FUNCTII ORIGINALE (TEXTE INTACTE)
 function showLegal(type) {
     const modal = document.getElementById('legalModal');
     const content = document.getElementById('legalText');
@@ -110,6 +36,27 @@ function showLegal(type) {
                 Datele sunt procesate securizat prin Stripe. Nu stocăm informații bancare; toate plățile sunt gestionate prin <strong>Power of Stripe</strong>.<br><br>
                 Acest serviciu respectă normele impuse de <span class="law-link" onclick="showLegal('law')">Legea 365/2002</span> privind comerțul electronic.<br><br>
                 E-mailul dvs. este folosit doar pentru facturare și comunicare tehnică.
+            </div>`;
+    } else if(type === 'gdpr') {
+        content.innerHTML = `
+            <h2>Protecția Datelor (GDPR)</h2>
+            <div class="legal-text-body">
+                Conform <strong>Regulamentului (UE) 2016/679 (GDPR)</strong>, vă informăm asupra drepturilor privind protecția datelor cu caracter personal:<br><br>
+                <strong>1. Drepturile Persoanei Vizate:</strong> Aveți dreptul de acces la date (Art. 15), dreptul la rectificare (Art. 16), dreptul la ștergerea datelor (Art. 17) și dreptul la restricționarea prelucrării (Art. 18).<br><br>
+                <strong>2. Temeiul Juridic:</strong> Prelucrarea este necesară pentru executarea unui contract la care persoana vizată este parte sau pentru a face demersuri la cererea persoanei vizate înainte de încheierea unui contract (Art. 6, alin. 1, lit. b).<br><br>
+                <strong>3. Portabilitatea și Opoziția:</strong> Aveți dreptul de a primi datele într-un format structurat și dreptul de a vă opune prelucrării în orice moment din motive legate de situația dvs. particulară.<br><br>
+                <strong>4. Autoritatea de Supraveghere:</strong> Aveți dreptul de a depune o plângere la ANSPDCP în cazul în care considerați că prelucrarea încalcă prevederile legale în vigoare.
+            </div>`;
+    } else if(type === 'security') {
+        content.innerHTML = `
+            <h2>Securitate</h2>
+            <div class="legal-text-body">
+                Siguranța datelor este integrată în ecosistemul nostru de lucru. În conformitate cu politicile de protecție a informațiilor, utilizăm exclusiv sisteme de operare <strong>iOS, macOS, watchOS,tvOS și visionOS </strong> pentru prelucrarea datelor cu caracter personal ale clienților.<br><br>
+                <strong>Angajamentul de securitate:</strong><br>
+                • Procesarea se realizează într-un mediu controlat, beneficiind de criptarea nativă a dispozitivelor Apple.<br>
+                • Standardele de securitate aplicate sunt conforme cu cerințele tehnice prezentate pe <a href="https://apple.com" target="_blank" style="color: var(--stripe-blue)">https://security.apple.com</a>.<br>
+                • Datele dvs. sunt accesate și gestionate prin protocoale stricte de autentificare pentru a preveni orice intervenție neautorizată.<br><br>
+                Prin accesarea serviciilor noastre, vă exprimați consimțământul pentru gestionarea informațiilor în acest cadru tehnologic securizat.
             </div>`;
     } else if(type === 'law') {
         content.innerHTML = `
@@ -151,3 +98,5 @@ function closeModal() {
     document.getElementById('legalModal').style.display = 'none';
     document.body.style.overflow = 'auto';
 }
+
+
