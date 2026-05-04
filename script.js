@@ -1,9 +1,10 @@
-//
-//  script.js
-//  Website
-//
-//  Created by Besleaga Alexandru Marian on 03/05/2026.
-//
+// Detecție Apple (macOS & iOS)
+const isApple = /Mac|iPhone|iPod|iPad/.test(navigator.platform) ||
+               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+if (isApple) {
+    document.body.classList.add('apple-device');
+}
 
 const year = 2026;
 const name = "Beșleagă Alexandru Marian";
@@ -99,4 +100,8 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
-
+window.addEventListener('keydown', function(event) {
+    if (event.key === "Escape") {
+        closeModal();
+    }
+});
