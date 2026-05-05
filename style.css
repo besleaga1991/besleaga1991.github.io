@@ -14,7 +14,6 @@ body, html {
     background-color: var(--bg-gray);
 }
 
-/* Animație fundal diagonală pentru Apple (macOS & iOS) */
 body.apple-device::before {
     content: "";
     position: fixed;
@@ -29,7 +28,7 @@ body.apple-device::before {
         var(--line-color) 58px,
         var(--line-color) 60px
     );
-    background-size: 85px 85px; /* Calculat pentru loop perfect fără delay */
+    background-size: 85px 85px;
     z-index: 0;
     animation: diagSlide 4s linear infinite;
     pointer-events: none;
