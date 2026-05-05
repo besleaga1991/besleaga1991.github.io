@@ -89,6 +89,7 @@ h1, h2 { color: var(--text-dark); font-size: 24px; margin-bottom: 10px; }
     font-size: 16px;
     box-sizing: border-box;
     flex-shrink: 0;
+    text-align: center;
 }
 
 .stripe-button:hover, .close-button:hover {

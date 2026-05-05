@@ -42,7 +42,7 @@
         </a>
     </div>
 
-    <!-- NOU: Card Curriculum Vitae -->
+    <!-- Card Curriculum Vitae -->
     <div class="payment-card" style="margin-top: 20px;">
         <h1>Curriculum Vitae</h1>
         <span class="price">25,00 RON</span>
@@ -50,6 +50,18 @@
         <a href="cv.html" class="stripe-button">
             Crează CV
         </a>
+    </div>
+
+    <!-- Card Colaborare -->
+    <div class="payment-card" style="margin-top: 20px;" id="auth-card">
+        <h1>Colaborare</h1>
+        <span class="price">Utilizator</span>
+        <div style="text-align: left; margin-bottom: 20px;">
+            <input type="email" id="login-email" placeholder="Email utilizator" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #e6ebf1; border-radius: 8px; box-sizing: border-box;">
+            <input type="password" id="login-pass" placeholder="Parola" style="width: 100%; padding: 12px; border: 1px solid #e6ebf1; border-radius: 8px; box-sizing: border-box;">
+        </div>
+        <button onclick="handleLogin()" class="stripe-button" style="margin-bottom: 15px;">Login</button>
+        <a href="inscriere.html" style="color: var(--text-light); font-size: 13px; text-decoration: underline; text-align: center; display: block;">Înscriere</a>
     </div>
 
     <div class="footer-links">

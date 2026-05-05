@@ -12,6 +12,23 @@ if(document.getElementById('copyright-notice')) {
     document.getElementById('copyright-notice').innerText = `© ${year} ${name}. Toate drepturile rezervate.`;
 }
 
+// Verificare sesiune la incarcare
+window.addEventListener('DOMContentLoaded', () => {
+    const session = localStorage.getItem('userSession');
+    if (session === 'active') {
+        const storedData = localStorage.getItem('userAccount');
+        if (storedData) {
+            const user = JSON.parse(storedData);
+            const now = new Date().getTime();
+            if (now < user.expiresAt) {
+                startDashboard(user);
+            } else {
+                handleLogout();
+            }
+        }
+    }
+});
+
 function showLegal(type) {
     const modal = document.getElementById('legalModal');
     const content = document.getElementById('legalText');
@@ -103,3 +120,94 @@ window.addEventListener('keydown', function(event) {
         closeModal();
     }
 });
+
+function handleRegister() {
+    const email = document.getElementById('reg-email').value;
+    const pass = document.getElementById('reg-pass').value;
+    const passConfirm = document.getElementById('reg-pass-confirm').value;
+
+    if (!email || !pass || !passConfirm) { alert("Te rugăm să completezi toate câmpurile."); return; }
+    if (pass !== passConfirm) { alert("Parolele nu coincid!"); return; }
+
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 15);
+
+    const userData = { email: email, password: pass, expiresAt: expiryDate.getTime() };
+    localStorage.setItem('userAccount', JSON.stringify(userData));
+    alert("Cont creat cu succes!");
+    window.location.href = 'index.html';
+}
+
+function handleLogin() {
+    const emailInput = document.getElementById('login-email').value;
+    const passInput = document.getElementById('login-pass').value;
+    const storedData = localStorage.getItem('userAccount');
+
+    if (!storedData) { alert("Nu există niciun cont înregistrat."); return; }
+
+    const user = JSON.parse(storedData);
+    const now = new Date().getTime();
+
+    if (now > user.expiresAt) {
+        alert("Perioada de 15 zile a expirat. Contul a fost șters automat.");
+        localStorage.removeItem('userAccount');
+        localStorage.removeItem('userSession');
+        location.reload();
+        return;
+    }
+
+    if (emailInput === user.email && passInput === user.password) {
+        localStorage.setItem('userSession', 'active');
+        startDashboard(user);
+    } else {
+        alert("Email sau parolă incorectă.");
+    }
+}
+
+function handleLogout() {
+    localStorage.removeItem('userSession');
+    location.reload();
+}
+
+function startDashboard(user) {
+    const authCard = document.getElementById('auth-card');
+    if(!authCard) return;
+
+    const updateTimer = () => {
+        const now = new Date().getTime();
+        const distance = user.expiresAt - now;
+
+        if (distance < 0) {
+            localStorage.removeItem('userAccount');
+            localStorage.removeItem('userSession');
+            location.reload();
+            return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        const timerElement = document.getElementById('countdown');
+        if(timerElement) {
+            timerElement.innerHTML = `${days}z ${hours}h ${minutes}m ${seconds}s`;
+        }
+    };
+
+    authCard.innerHTML = `
+        <h1>Salut,</h1>
+        <span class="price" style="font-size:16px">${user.email}</span>
+        <div style="background: #f0f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <p style="font-size: 13px; color: var(--text-dark); margin-bottom: 5px;">Timp rămas pentru colaborare:</p>
+            <div id="countdown" style="font-weight: 800; color: var(--stripe-blue); font-size: 20px;">--</div>
+        </div>
+        <p style="font-size: 12px; color: var(--text-light); line-height: 1.4; text-align: center;">
+            Aveți 15 zile la dispoziție sa găsiți un client. Success ! Acest cont se va șterge automat după acesta perioada.
+        </p>
+        <button onclick="handleLogout()" class="stripe-button" style="margin-top:10px">Logout</button>
+    `;
+
+    setInterval(updateTimer, 1000);
+    updateTimer();
+}
