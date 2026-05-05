@@ -212,34 +212,96 @@ function startDashboard(user) {
     updateTimer();
 }
 
-// 1. Funcția care aplică vizibilitatea (Online/Offline)
-function applySettings(shouldSave = true) {
+// Funcția care aplică vizibilitatea în timp real
+function applySettings() {
     const toggles = document.querySelectorAll('#main-toggles input');
     const cards = document.querySelectorAll('.wrapper > .payment-card:not(#settings-card):not(#offline-card)');
     const offline = document.getElementById('offline-card');
     const footer = document.querySelector('.footer-links');
 
-    // Sincronizăm cardurile cu butoanele
+    let anyActive = false;
+
+    // Sincronizăm vizibilitatea cardurilor cu butoanele
     toggles.forEach((t, i) => {
-        if (cards[i]) cards[i].style.display = t.checked ? 'flex' : 'none';
+        if (cards[i]) {
+            if (t.checked) {
+                cards[i].style.display = 'flex';
+                anyActive = true;
+            } else {
+                cards[i].style.display = 'none';
+            }
+        }
     });
 
-    // Verificăm dacă TOTUL este oprit
-    const allOff = Array.from(toggles).every(t => !t.checked);
+    // Verificăm dacă butonul 4 (Colaborare) este dezactivat
+    const isFourthOff = (toggles[3] && !toggles[3].checked);
 
-    if (allOff) {
+    if (!anyActive || isFourthOff) {
+        cards.forEach(c => c.style.display = 'none');
         if (offline) offline.style.display = 'flex';
         if (footer) footer.style.display = 'none';
     } else {
         if (offline) offline.style.display = 'none';
         if (footer) footer.style.display = 'block';
     }
+}
 
-    if (shouldSave) {
-        const states = Array.from(toggles).map(t => t.checked);
-        localStorage.setItem('siteSettings', JSON.stringify(states));
+// Funcția de toggle pentru butoane
+function toggleCard(index, checkbox) {
+    applySettings();
+}
+
+// Funcția pentru butonul rulment
+function toggleSettings() {
+    const sCard = document.getElementById('settings-card');
+    if (sCard) {
+        const isHidden = (sCard.style.display === 'none' || sCard.style.display === '');
+        sCard.style.display = isHidden ? 'flex' : 'none';
     }
 }
+
+// La încărcare, ne asigurăm că totul pornește corect conform bifelor din HTML
+window.onload = applySettings;
+
+
+// 2. Funcția de inițializare (Cheia problemei tale)
+function init() {
+    const saved = localStorage.getItem('siteSettings');
+    const toggles = document.querySelectorAll('#main-toggles input');
+    
+    if (saved && toggles.length > 0) {
+        // DACĂ EXISTĂ ISTORIC: Restaurăm ce a ales utilizatorul data trecută
+        const states = JSON.parse(saved);
+        toggles.forEach((t, i) => {
+            if (states[i] !== undefined) t.checked = states[i];
+        });
+    } else {
+        // DACĂ NU EXISTĂ ISTORIC (Prima deschidere): Forțăm totul pe OFF
+        toggles.forEach(t => t.checked = false);
+    }
+    
+    // Aplicăm setările imediat (va ascunde site-ul dacă e prima dată sau dacă a fost lăsat offline)
+    applySettings(false);
+}
+
+// Rulăm imediat ce s-a încărcat structura
+document.addEventListener('DOMContentLoaded', init);
+
+// Funcția pentru butoanele toggle din interfață
+function toggleCard(index, checkbox) {
+    applySettings(true);
+}
+
+// Funcția pentru rulment
+function toggleSettings() {
+    const sCard = document.getElementById('settings-card');
+    if (sCard) {
+        const isHidden = (sCard.style.display === 'none' || sCard.style.display === '');
+        sCard.style.display = isHidden ? 'flex' : 'none';
+    }
+}
+
+
 
 // 2. Această funcție rulează INSTANT, nu așteaptă încărcarea completă
 function init() {
