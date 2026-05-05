@@ -211,3 +211,44 @@ function startDashboard(user) {
     setInterval(updateTimer, 1000);
     updateTimer();
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('siteSettings');
+    if (saved) {
+        const states = JSON.parse(saved);
+        const toggles = document.querySelectorAll('#main-toggles input');
+        toggles.forEach((t, i) => {
+            t.checked = states[i];
+            toggleCard(i, t, false);
+        });
+    }
+});
+
+function toggleSettings() {
+    const sCard = document.getElementById('settings-card');
+    sCard.style.display = (sCard.style.display === 'none' || sCard.style.display === '') ? 'flex' : 'none';
+}
+
+function toggleCard(index, checkbox, shouldSave = true) {
+    const cards = document.querySelectorAll('.wrapper > .payment-card:not(#settings-card):not(#offline-card)');
+    const offline = document.getElementById('offline-card');
+    const footer = document.querySelector('.footer-links');
+
+    if(cards[index]) cards[index].style.display = checkbox.checked ? 'flex' : 'none';
+
+    const toggles = document.querySelectorAll('#main-toggles input');
+    const allOff = Array.from(toggles).every(t => !t.checked);
+
+    if (allOff) {
+        offline.style.display = 'flex';
+        footer.style.display = 'none';
+    } else {
+        offline.style.display = 'none';
+        footer.style.display = 'block';
+    }
+
+    if (shouldSave) {
+        const states = Array.from(toggles).map(t => t.checked);
+        localStorage.setItem('siteSettings', JSON.stringify(states));
+    }
+}
