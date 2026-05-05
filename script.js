@@ -1,34 +1,176 @@
+// --- CONFIGURARE ȘI DETECTARE DISPOZITIV ---
 const isApple = /Mac|iPhone|iPod|iPad/.test(navigator.platform) ||
                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-if (isApple) {
-    document.body.classList.add('apple-device');
-}
+if (isApple) { document.body.classList.add('apple-device'); }
 
 const year = 2026;
 const name = "Beșleagă Alexandru Marian";
 
-if(document.getElementById('copyright-notice')) {
-    document.getElementById('copyright-notice').innerText = `© ${year} ${name}. Toate drepturile rezervate.`;
-}
+// --- FUNCȚIA CENTRALĂ DE PORNIRE ---
+function startup() {
+    const cp = document.getElementById('copyright-notice');
+    if(cp) cp.innerText = `© ${year} ${name}. Toate drepturile rezervate.`;
 
-// Verificare sesiune la incarcare
-window.addEventListener('DOMContentLoaded', () => {
+    const storedData = localStorage.getItem('userAccount');
     const session = localStorage.getItem('userSession');
-    if (session === 'active') {
-        const storedData = localStorage.getItem('userAccount');
-        if (storedData) {
-            const user = JSON.parse(storedData);
-            const now = new Date().getTime();
-            if (now < user.expiresAt) {
+
+    if (storedData) {
+        const user = JSON.parse(storedData);
+        const now = new Date().getTime();
+        if (now < user.expiresAt) {
+            if (session === 'active') {
                 startDashboard(user);
-            } else {
-                handleLogout();
             }
+        } else {
+            localStorage.removeItem('userAccount');
+            localStorage.removeItem('userSession');
         }
     }
-});
 
+    const savedSettings = localStorage.getItem('siteSettings');
+    const toggles = document.querySelectorAll('#main-toggles input');
+    
+    if (toggles.length > 0) {
+        if (savedSettings) {
+            const states = JSON.parse(savedSettings);
+            toggles.forEach((t, i) => { if (states[i] !== undefined) t.checked = states[i]; });
+        } else {
+            // Implicit toate sunt PORNITE la prima vizită
+            toggles.forEach(t => t.checked = true);
+        }
+    }
+    applySettings(false);
+}
+
+document.addEventListener('DOMContentLoaded', startup);
+
+// --- LOGICA DE AUTENTIFICARE ---
+function handleRegister() {
+    const email = document.getElementById('reg-email').value;
+    const pass = document.getElementById('reg-pass').value;
+    const passConfirm = document.getElementById('reg-pass-confirm').value;
+
+    if (!email || !pass || !passConfirm) { alert("Te rugăm să completezi toate câmpurile."); return; }
+    if (pass !== passConfirm) { alert("Parolele nu coincid!"); return; }
+
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 15);
+
+    const userData = { email: email, password: pass, expiresAt: expiryDate.getTime() };
+    localStorage.setItem('userAccount', JSON.stringify(userData));
+    localStorage.setItem('userSession', 'active');
+    
+    alert("Cont creat cu succes!");
+    window.location.href = 'index.html';
+}
+
+function handleLogin() {
+    const emailInput = document.getElementById('login-email').value;
+    const passInput = document.getElementById('login-pass').value;
+    const storedData = localStorage.getItem('userAccount');
+
+    if (!storedData) { alert("Nu există niciun cont înregistrat."); return; }
+
+    const user = JSON.parse(storedData);
+    if (emailInput === user.email && passInput === user.password) {
+        localStorage.setItem('userSession', 'active');
+        startDashboard(user);
+    } else {
+        alert("Email sau parolă incorectă.");
+    }
+}
+
+function startDashboard(user) {
+    const authCard = document.getElementById('auth-card');
+    if(!authCard) return;
+
+    const updateTimer = () => {
+        const now = new Date().getTime();
+        const distance = user.expiresAt - now;
+        if (distance < 0) { handleLogout(); return; }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        const timerElement = document.getElementById('countdown');
+        if(timerElement) timerElement.innerHTML = `${days}z ${hours}h ${minutes}m ${seconds}s`;
+    };
+
+    authCard.innerHTML = `
+        <h1>Salut,</h1>
+        <span class="price" style="font-size:16px">${user.email}</span>
+        <div style="background: #f0f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <p style="font-size: 13px; color: var(--text-dark); margin-bottom: 5px;">Timp rămas pentru colaborare:</p>
+            <div id="countdown" style="font-weight: 800; color: var(--stripe-blue); font-size: 20px;">--</div>
+        </div>
+        <p style="font-size: 12px; color: var(--text-light); line-height: 1.4; text-align: center;">
+            Aveți 15 zile la dispoziție sa găsiți un client. Success ! Acest cont se va șterge automat după acesta perioada.
+        </p>
+        <button onclick="handleLogout()" class="stripe-button" style="margin-top:10px">Logout</button>
+    `;
+
+    setInterval(updateTimer, 1000);
+    updateTimer();
+    applySettings(false);
+}
+
+function handleLogout() {
+    localStorage.removeItem('userSession');
+    location.reload();
+}
+
+// --- LOGICA DE VIZIBILITATE RECTIFICATĂ (4 Toggles -> 4 Carduri) ---
+function applySettings(shouldSave = true) {
+    const toggles = document.querySelectorAll('#main-toggles input');
+    // Selectăm toate cele 4 carduri: Conținut, Basic, CV, Colaborare (auth-card)
+    const cards = [
+        document.querySelector('.payment-card:nth-of-type(1)'),
+        document.querySelector('.payment-card:nth-of-type(2)'),
+        document.querySelector('.payment-card:nth-of-type(3)'),
+        document.getElementById('auth-card')
+    ];
+    
+    const offlineCard = document.getElementById('offline-card');
+    const footer = document.querySelector('.footer-links');
+
+    if (!toggles || toggles.length === 0) {
+        return; // Pe paginile secundare nu facem toggle
+    }
+
+    let states = [];
+    let anyActive = false;
+
+    toggles.forEach((t, i) => {
+        states.push(t.checked);
+        if (cards[i]) {
+            cards[i].style.display = t.checked ? 'flex' : 'none';
+            if (t.checked) anyActive = true;
+        }
+    });
+
+    if (shouldSave) localStorage.setItem('siteSettings', JSON.stringify(states));
+
+    // Cardul Offline apare DOAR dacă absolut toate sunt pe OFF
+    if (!anyActive) {
+        if (offlineCard) offlineCard.style.display = 'flex';
+        if (footer) footer.style.display = 'none';
+    } else {
+        if (offlineCard) offlineCard.style.display = 'none';
+        if (footer) footer.style.display = 'block';
+    }
+}
+
+function toggleCard(index, checkbox) { applySettings(true); }
+
+function toggleSettings() {
+    const sCard = document.getElementById('settings-card');
+    if (sCard) sCard.style.display = (sCard.style.display === 'none' || sCard.style.display === '') ? 'flex' : 'none';
+}
+
+// --- TEXTE LEGALE INTACTE ---
 function showLegal(type) {
     const modal = document.getElementById('legalModal');
     const content = document.getElementById('legalText');
@@ -50,7 +192,7 @@ function showLegal(type) {
             <h2>Politică de Confidențialitate</h2>
             <div class="legal-text-body">
                 Datele sunt procesate securizat prin Stripe. Nu stocăm informații bancare; toate plățile sunt gestionate prin <strong>Power of Stripe</strong>.<br><br>
-                Acest serviciu respectă normele impuse de <span class="law-link" onclick="showLegal('law')">Legea 365/2002</span> privind comerțul electronic.<br><br>
+                Acest serviciu respectă normele impuse de <span style="color:var(--stripe-blue);cursor:pointer;text-decoration:underline" onclick="showLegal('law')">Legea 365/2002</span> privind comerțul electronic.<br><br>
                 E-mailul dvs. este folosit doar pentru facturare și comunicare tehnică.
             </div>`;
     } else if(type === 'gdpr') {
@@ -70,7 +212,7 @@ function showLegal(type) {
                 Siguranța datelor este integrată în ecosistemul nostru de lucru. În conformitate cu politicile de protecție a informațiilor, utilizăm exclusiv sisteme de operare <strong>iOS, macOS, watchOS,tvOS și visionOS </strong> pentru prelucrarea datelor cu caracter personal ale clienților.<br><br>
                 <strong>Angajamentul de securitate:</strong><br>
                 • Procesarea se realizează într-un mediu controlat, beneficiind de criptarea nativă a dispozitivelor Apple.<br>
-                • Standardele de securitate aplicate sunt conforme cu cerințele tehnice prezentate pe <a href="https://apple.com" target="_blank" style="color: var(--stripe-blue)">https://security.apple.com</a>.<br>
+                • Standardele de securitate aplicate sunt conforme cu cerințele tehnice prezentate pe <a href="https://apple.com" target="_blank" style="color: var(--stripe-blue)">https://apple.com</a>.<br>
                 • Datele dvs. sunt accesate și gestionate prin protocoale stricte de autentificare pentru a preveni orice intervenție neautorizată.<br><br>
                 Prin accesarea serviciilor noastre, vă exprimați consimțământul pentru gestionarea informațiilor în acest cadru tehnologic securizat.
             </div>`;
@@ -81,7 +223,7 @@ function showLegal(type) {
                 <strong>Art. 4: Libera circulație</strong> - Furnizarea de servicii ale societății informaționale este liberă și nu este supusă niciunei autorizări prealabile.<br><br>
                 <strong>Art. 7: Informarea consumatorului</strong> - Prestatorul are obligația de a afișa datele de identificare, e-mailul și tarifele serviciilor.<br><br>
                 <strong>Art. 9: Contracte electronice</strong> - Contractele încheiate prin mijloace electronice produc toate efectele legale ale unui contract sub semnătură privată.<br><br>
-                <span class="anaf-sub-link" onclick="showLegal('fiscal')">Consultă obligațiile fiscale (ANAF)</span>
+                <span style="color:var(--stripe-blue);cursor:pointer;text-decoration:underline" onclick="showLegal('fiscal')">Consultă obligațiile fiscale (ANAF)</span>
             </div>`;
     } else if(type === 'fiscal') {
         content.innerHTML = `
@@ -115,235 +257,4 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
-window.addEventListener('keydown', function(event) {
-    if (event.key === "Escape") {
-        closeModal();
-    }
-});
-
-function handleRegister() {
-    const email = document.getElementById('reg-email').value;
-    const pass = document.getElementById('reg-pass').value;
-    const passConfirm = document.getElementById('reg-pass-confirm').value;
-
-    if (!email || !pass || !passConfirm) { alert("Te rugăm să completezi toate câmpurile."); return; }
-    if (pass !== passConfirm) { alert("Parolele nu coincid!"); return; }
-
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + 15);
-
-    const userData = { email: email, password: pass, expiresAt: expiryDate.getTime() };
-    localStorage.setItem('userAccount', JSON.stringify(userData));
-    alert("Cont creat cu succes!");
-    window.location.href = 'index.html';
-}
-
-function handleLogin() {
-    const emailInput = document.getElementById('login-email').value;
-    const passInput = document.getElementById('login-pass').value;
-    const storedData = localStorage.getItem('userAccount');
-
-    if (!storedData) { alert("Nu există niciun cont înregistrat."); return; }
-
-    const user = JSON.parse(storedData);
-    const now = new Date().getTime();
-
-    if (now > user.expiresAt) {
-        alert("Perioada de 15 zile a expirat. Contul a fost șters automat.");
-        localStorage.removeItem('userAccount');
-        localStorage.removeItem('userSession');
-        location.reload();
-        return;
-    }
-
-    if (emailInput === user.email && passInput === user.password) {
-        localStorage.setItem('userSession', 'active');
-        startDashboard(user);
-    } else {
-        alert("Email sau parolă incorectă.");
-    }
-}
-
-function handleLogout() {
-    localStorage.removeItem('userSession');
-    location.reload();
-}
-
-function startDashboard(user) {
-    const authCard = document.getElementById('auth-card');
-    if(!authCard) return;
-
-    const updateTimer = () => {
-        const now = new Date().getTime();
-        const distance = user.expiresAt - now;
-
-        if (distance < 0) {
-            localStorage.removeItem('userAccount');
-            localStorage.removeItem('userSession');
-            location.reload();
-            return;
-        }
-
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-        const timerElement = document.getElementById('countdown');
-        if(timerElement) {
-            timerElement.innerHTML = `${days}z ${hours}h ${minutes}m ${seconds}s`;
-        }
-    };
-
-    authCard.innerHTML = `
-        <h1>Salut,</h1>
-        <span class="price" style="font-size:16px">${user.email}</span>
-        <div style="background: #f0f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <p style="font-size: 13px; color: var(--text-dark); margin-bottom: 5px;">Timp rămas pentru colaborare:</p>
-            <div id="countdown" style="font-weight: 800; color: var(--stripe-blue); font-size: 20px;">--</div>
-        </div>
-        <p style="font-size: 12px; color: var(--text-light); line-height: 1.4; text-align: center;">
-            Aveți 15 zile la dispoziție sa găsiți un client. Success ! Acest cont se va șterge automat după acesta perioada.
-        </p>
-        <button onclick="handleLogout()" class="stripe-button" style="margin-top:10px">Logout</button>
-    `;
-
-    setInterval(updateTimer, 1000);
-    updateTimer();
-}
-
-// Funcția care aplică vizibilitatea în timp real
-function applySettings(shouldSave = true) {
-    const toggles = document.querySelectorAll('#main-toggles input');
-    const cards = document.querySelectorAll('.wrapper > .payment-card:not(#settings-card):not(#offline-card)');
-    const offlineCard = document.getElementById('offline-card');
-    const footer = document.querySelector('.footer-links');
-
-    // DACĂ NU SUNTEM PE PAGINA PRINCIPALĂ (nu există toggles)
-    // Afișăm cardurile normal
-    if (toggles.length === 0) {
-        cards.forEach(c => c.style.display = 'flex');
-        return;
-    }
-
-    // LOGICA PENTRU PAGINA PRINCIPALĂ (cu butoane)
-    let states = [];
-    let anyActive = false;
-
-    toggles.forEach((t, i) => {
-        states.push(t.checked);
-        if (cards[i]) {
-            if (t.checked) {
-                cards[i].style.display = 'flex';
-                anyActive = true;
-            } else {
-                cards[i].style.display = 'none';
-            }
-        }
-    });
-
-    if (shouldSave) {
-        localStorage.setItem('siteSettings', JSON.stringify(states));
-    }
-
-    // Verificăm butonul 4 (Colaborare)
-    const isFourthOff = (toggles[3] && !toggles[3].checked);
-    
-    if (!anyActive || isFourthOff) {
-        cards.forEach(c => c.style.display = 'none');
-        if (offlineCard) offlineCard.style.display = 'flex';
-        if (footer) footer.style.display = 'none';
-    } else {
-        if (offlineCard) offlineCard.style.display = 'none';
-        if (footer) footer.style.display = 'block';
-    }
-}
-
-
-// Funcția de toggle pentru butoane
-function toggleCard(index, checkbox) {
-    applySettings();
-}
-
-// Funcția pentru butonul rulment
-function toggleSettings() {
-    const sCard = document.getElementById('settings-card');
-    if (sCard) {
-        const isHidden = (sCard.style.display === 'none' || sCard.style.display === '');
-        sCard.style.display = isHidden ? 'flex' : 'none';
-    }
-}
-
-// La încărcare, ne asigurăm că totul pornește corect conform bifelor din HTML
-window.onload = applySettings;
-
-
-// 2. Funcția de inițializare (Cheia problemei tale)
-function init() {
-    const saved = localStorage.getItem('siteSettings');
-    const toggles = document.querySelectorAll('#main-toggles input');
-    
-    if (saved && toggles.length > 0) {
-        // DACĂ EXISTĂ ISTORIC: Restaurăm ce a ales utilizatorul data trecută
-        const states = JSON.parse(saved);
-        toggles.forEach((t, i) => {
-            if (states[i] !== undefined) t.checked = states[i];
-        });
-    } else {
-        // DACĂ NU EXISTĂ ISTORIC (Prima deschidere): Forțăm totul pe OFF
-        toggles.forEach(t => t.checked = false);
-    }
-    
-    // Aplicăm setările imediat (va ascunde site-ul dacă e prima dată sau dacă a fost lăsat offline)
-    applySettings(false);
-}
-
-// Rulăm imediat ce s-a încărcat structura
-document.addEventListener('DOMContentLoaded', init);
-
-// Funcția pentru butoanele toggle din interfață
-function toggleCard(index, checkbox) {
-    applySettings(true);
-}
-
-// Funcția pentru rulment
-function toggleSettings() {
-    const sCard = document.getElementById('settings-card');
-    if (sCard) {
-        const isHidden = (sCard.style.display === 'none' || sCard.style.display === '');
-        sCard.style.display = isHidden ? 'flex' : 'none';
-    }
-}
-
-
-
-// 2. Această funcție rulează INSTANT, nu așteaptă încărcarea completă
-function init() {
-    const saved = localStorage.getItem('siteSettings');
-    const toggles = document.querySelectorAll('#main-toggles input');
-    
-    if (saved) {
-        const states = JSON.parse(saved);
-        toggles.forEach((t, i) => {
-            if (states[i] !== undefined) {
-                t.checked = states[i]; // Suprascriem HTML-ul
-            }
-        });
-    }
-    applySettings(false);
-}
-
-// Executăm inițializarea
-init();
-
-// 3. Funcțiile pentru butoane (Rămân neschimbate)
-function toggleCard(index, checkbox) {
-    applySettings(true);
-}
-
-function toggleSettings() {
-    const sCard = document.getElementById('settings-card');
-    if (sCard) {
-        sCard.style.display = (sCard.style.display === 'none' || sCard.style.display === '') ? 'flex' : 'none';
-    }
-}
+window.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
