@@ -213,16 +213,25 @@ function startDashboard(user) {
 }
 
 // Funcția care aplică vizibilitatea în timp real
-function applySettings() {
+function applySettings(shouldSave = true) {
     const toggles = document.querySelectorAll('#main-toggles input');
     const cards = document.querySelectorAll('.wrapper > .payment-card:not(#settings-card):not(#offline-card)');
-    const offline = document.getElementById('offline-card');
+    const offlineCard = document.getElementById('offline-card');
     const footer = document.querySelector('.footer-links');
 
+    // DACĂ NU SUNTEM PE PAGINA PRINCIPALĂ (nu există toggles)
+    // Afișăm cardurile normal
+    if (toggles.length === 0) {
+        cards.forEach(c => c.style.display = 'flex');
+        return;
+    }
+
+    // LOGICA PENTRU PAGINA PRINCIPALĂ (cu butoane)
+    let states = [];
     let anyActive = false;
 
-    // Sincronizăm vizibilitatea cardurilor cu butoanele
     toggles.forEach((t, i) => {
+        states.push(t.checked);
         if (cards[i]) {
             if (t.checked) {
                 cards[i].style.display = 'flex';
@@ -233,18 +242,23 @@ function applySettings() {
         }
     });
 
-    // Verificăm dacă butonul 4 (Colaborare) este dezactivat
-    const isFourthOff = (toggles[3] && !toggles[3].checked);
+    if (shouldSave) {
+        localStorage.setItem('siteSettings', JSON.stringify(states));
+    }
 
+    // Verificăm butonul 4 (Colaborare)
+    const isFourthOff = (toggles[3] && !toggles[3].checked);
+    
     if (!anyActive || isFourthOff) {
         cards.forEach(c => c.style.display = 'none');
-        if (offline) offline.style.display = 'flex';
+        if (offlineCard) offlineCard.style.display = 'flex';
         if (footer) footer.style.display = 'none';
     } else {
-        if (offline) offline.style.display = 'none';
+        if (offlineCard) offlineCard.style.display = 'none';
         if (footer) footer.style.display = 'block';
     }
 }
+
 
 // Funcția de toggle pentru butoane
 function toggleCard(index, checkbox) {

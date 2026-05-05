@@ -68,13 +68,13 @@ body.apple-device::before {
     flex-direction: column;
 }
 
-/* STARE INIȚIALĂ: Ascundem cardurile de servicii și offline-ul
-   pentru a lăsa JS-ul să decidă starea salvată fără erori vizuale */
-.payment-card:not(#settings-card):not(#auth-card) {
-    display: none;
+/* Cardurile sunt vizibile implicit */
+.payment-card {
+    display: flex;
 }
 
-#offline-card {
+/* Ascundem doar elementele care chiar trebuie să stea ascunse la start */
+#offline-card, #settings-card {
     display: none;
 }
 
