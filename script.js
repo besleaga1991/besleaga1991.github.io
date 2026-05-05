@@ -70,7 +70,7 @@ function showLegal(type) {
                 Siguranța datelor este integrată în ecosistemul nostru de lucru. În conformitate cu politicile de protecție a informațiilor, utilizăm exclusiv sisteme de operare <strong>iOS, macOS, watchOS,tvOS și visionOS </strong> pentru prelucrarea datelor cu caracter personal ale clienților.<br><br>
                 <strong>Angajamentul de securitate:</strong><br>
                 • Procesarea se realizează într-un mediu controlat, beneficiind de criptarea nativă a dispozitivelor Apple.<br>
-                • Standardele de securitate aplicate sunt conforme cu cerințele tehnice prezentate pe <a href="https://apple.com" target="_blank" style="color: var(--stripe-blue)">https://apple.com</a>.<br>
+                • Standardele de securitate aplicate sunt conforme cu cerințele tehnice prezentate pe <a href="https://apple.com" target="_blank" style="color: var(--stripe-blue)">https://security.apple.com</a>.<br>
                 • Datele dvs. sunt accesate și gestionate prin protocoale stricte de autentificare pentru a preveni orice intervenție neautorizată.<br><br>
                 Prin accesarea serviciilor noastre, vă exprimați consimțământul pentru gestionarea informațiilor în acest cadru tehnologic securizat.
             </div>`;
