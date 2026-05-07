@@ -47,3 +47,52 @@ h1, h2 { color: var(--text-dark); font-size: 24px; margin-bottom: 10px; }
 input:checked + .slider { background-color: var(--stripe-blue); }
 input:checked + .slider:before { transform: translateX(18px); }
 .toggle-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+
+/* Containerul iconițelor */
+.modal-social-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+/* Stil de bază pentru butoane */
+.social-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    color: #444;
+    text-decoration: none;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+/* Dimensiune pictograme SVG */
+.social-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Stil Hover YouTube */
+.icon-yt:hover {
+    background-color: #FF0000;
+    color: #fff;
+    transform: translateY(-3px);
+}
+
+/* Stil Hover Facebook */
+.icon-fb:hover {
+    background-color: #1877F2;
+    color: #fff;
+    transform: translateY(-3px);
+}
+
+/* Efect la apăsare */
+.social-icon:active {
+    transform: scale(0.9);
+}
