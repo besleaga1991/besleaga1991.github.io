@@ -7,144 +7,43 @@
     --line-color: rgba(103, 114, 229, 0.12);
 }
 
-body, html {
-    height: 100%;
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: var(--bg-gray);
-    overflow-x: hidden;
-}
+body, html { height: 100%; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-gray); overflow-x: hidden; }
 
-/* Fundal animat pentru dispozitive Apple */
 body.apple-device::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 58px,
-        var(--line-color) 58px,
-        var(--line-color) 60px
-    );
-    background-size: 85px 85px;
-    z-index: 0;
-    animation: diagSlide 4s linear infinite;
-    pointer-events: none;
+    content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-image: repeating-linear-gradient(45deg, transparent, transparent 58px, var(--line-color) 58px, var(--line-color) 60px);
+    background-size: 85px 85px; z-index: 0; animation: diagSlide 4s linear infinite; pointer-events: none;
 }
+@keyframes diagSlide { from { background-position: 0 0; } to { background-position: 85px 0; } }
 
-@keyframes diagSlide {
-    from { background-position: 0 0; }
-    to { background-position: 85px 0; }
-}
-
-.wrapper {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 20px;
-    box-sizing: border-box;
-    position: relative;
-    z-index: 1;
-}
-
-/* Carduri Standard */
-.payment-card, .legal-card {
-    background: white;
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 15px 35px rgba(50,50,93,.1), 0 5px 15px rgba(0,0,0,.07);
-    text-align: center;
-    max-width: 400px;
-    width: 100%;
-    box-sizing: border-box;
-    animation: fadeIn 0.3s ease-out;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Cardurile sunt vizibile implicit */
-.payment-card {
-    display: flex;
-}
-
-/* Ascundem doar elementele care chiar trebuie să stea ascunse la start */
-#offline-card, #settings-card {
-    display: none;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+.wrapper { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; position: relative; z-index: 1; }
+.payment-card, .legal-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 15px 35px rgba(50,50,93,.1), 0 5px 15px rgba(0,0,0,.07); text-align: center; max-width: 400px; width: 100%; box-sizing: border-box; animation: fadeIn 0.3s ease-out; display: flex; flex-direction: column; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 h1, h2 { color: var(--text-dark); font-size: 24px; margin-bottom: 10px; }
 .price { font-size: 32px; font-weight: 800; color: var(--stripe-blue); display: block; margin-bottom: 20px; }
+.stripe-button, .close-button { background-color: var(--stripe-blue); color: white; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; display: block; transition: all 0.2s; border: none; cursor: pointer; text-align: center; }
 
-/* Butoane tip Stripe */
-.stripe-button, .close-button {
-    background-color: var(--stripe-blue);
-    color: white;
-    padding: 16px 32px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    display: block;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 6px rgba(50,50,93,.11);
-    border: none;
-    width: 100%;
-    cursor: pointer;
-    font-size: 16px;
-    box-sizing: border-box;
-    flex-shrink: 0;
-    text-align: center;
-}
-
-.stripe-button:hover, .close-button:hover {
-    background-color: #5469d4;
-    transform: translateY(-2px);
-    box-shadow: 0 7px 14px rgba(50,50,93,.1);
-}
-
-/* Footer & Linkuri */
-.footer-links { margin-top: 25px; text-align: center; position: relative; z-index: 2; }
-.footer-links a { color: var(--text-light); text-decoration: none; font-size: 13px; margin: 0 10px; transition: color 0.2s; }
-.footer-links a:hover { color: var(--stripe-blue); text-decoration: underline; }
+.footer-links { margin-top: 25px; text-align: center; }
+.footer-links a { color: var(--text-light); text-decoration: none; font-size: 13px; margin: 0 10px; }
 .copyright { margin-top: 20px; font-size: 12px; color: #aab7c4; }
 
-/* Modal Legal */
-.modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: var(--bg-gray); }
-.modal-content-wrapper { display: flex; justify-content: center; align-items: center; height: 100vh; padding: 20px; box-sizing: border-box; }
-.legal-text-body { color: var(--text-light); line-height: 1.6; margin-bottom: 30px; text-align: left; font-size: 14px; overflow-y: auto; max-height: 50vh; padding-right: 10px; }
-.legal-text-body::-webkit-scrollbar { width: 4px; }
-.legal-text-body::-webkit-scrollbar-thumb { background: #e6ebf1; border-radius: 4px; }
+/* Rulment footer */
+.footer-gear { display: inline-flex; align-items: center; cursor: pointer; color: #aab7c4; transition: 0.3s; vertical-align: middle; }
+.footer-gear svg { width: 14px; height: 14px; }
+.footer-gear:hover { color: var(--text-light); transform: rotate(90deg); }
 
-/* Buton Rulment FIX (Settings Trigger) */
-.settings-trigger {
-    width: 36px !important;
-    height: 36px !important;
-    background: white; border-radius: 8px;
-    display: flex; justify-content: center; align-items: center;
-    cursor: pointer; box-shadow: 0 4px 6px rgba(50,50,93,.11);
-    color: var(--text-light);
-    margin: 30px auto 20px auto !important;
-    transition: all 0.3s ease;
-}
+.settings-trigger { width: 36px; height: 36px; background: white; border-radius: 8px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 6px rgba(50,50,93,.11); color: var(--text-light); margin: 30px auto 20px auto; transition: 0.3s; }
 .settings-trigger svg { width: 18px; height: 18px; }
 .settings-trigger:hover { color: var(--stripe-blue); transform: rotate(90deg); }
 
-/* Toggle Switches */
+.modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: var(--bg-gray); }
+.modal-content-wrapper { display: flex; justify-content: center; align-items: center; height: 100vh; padding: 20px; }
+.legal-text-body { color: var(--text-light); line-height: 1.6; margin-bottom: 30px; text-align: left; font-size: 14px; overflow-y: auto; max-height: 50vh; }
 .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
 .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
 input:checked + .slider { background-color: var(--stripe-blue); }
 input:checked + .slider:before { transform: translateX(18px); }
-
 .toggle-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }

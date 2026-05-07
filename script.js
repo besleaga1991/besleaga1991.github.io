@@ -36,11 +36,19 @@ function startup() {
             const states = JSON.parse(savedSettings);
             toggles.forEach((t, i) => { if (states[i] !== undefined) t.checked = states[i]; });
         } else {
-            // Implicit toate sunt PORNITE la prima vizită
             toggles.forEach(t => t.checked = true);
         }
     }
     applySettings(false);
+
+    // Restaurare setări Control (Footer)
+    const savedLegal = localStorage.getItem('legalSettings');
+    const legalToggles = document.querySelectorAll('#legal-toggles input');
+    if (savedLegal && legalToggles.length > 0) {
+        const states = JSON.parse(savedLegal);
+        legalToggles.forEach((t, i) => { if (states[i] !== undefined) t.checked = states[i]; });
+    }
+    applyLegalVisibility(false);
 }
 
 document.addEventListener('DOMContentLoaded', startup);
@@ -122,10 +130,8 @@ function handleLogout() {
     location.reload();
 }
 
-// --- LOGICA DE VIZIBILITATE RECTIFICATĂ (4 Toggles -> 4 Carduri) ---
 function applySettings(shouldSave = true) {
     const toggles = document.querySelectorAll('#main-toggles input');
-    // Selectăm toate cele 4 carduri: Conținut, Basic, CV, Colaborare (auth-card)
     const cards = [
         document.querySelector('.payment-card:nth-of-type(1)'),
         document.querySelector('.payment-card:nth-of-type(2)'),
@@ -136,9 +142,7 @@ function applySettings(shouldSave = true) {
     const offlineCard = document.getElementById('offline-card');
     const footer = document.querySelector('.footer-links');
 
-    if (!toggles || toggles.length === 0) {
-        return; // Pe paginile secundare nu facem toggle
-    }
+    if (!toggles || toggles.length === 0) return;
 
     let states = [];
     let anyActive = false;
@@ -153,7 +157,6 @@ function applySettings(shouldSave = true) {
 
     if (shouldSave) localStorage.setItem('siteSettings', JSON.stringify(states));
 
-    // Cardul Offline apare DOAR dacă absolut toate sunt pe OFF
     if (!anyActive) {
         if (offlineCard) offlineCard.style.display = 'flex';
         if (footer) footer.style.display = 'none';
@@ -164,13 +167,30 @@ function applySettings(shouldSave = true) {
 }
 
 function toggleCard(index, checkbox) { applySettings(true); }
-
 function toggleSettings() {
     const sCard = document.getElementById('settings-card');
     if (sCard) sCard.style.display = (sCard.style.display === 'none' || sCard.style.display === '') ? 'flex' : 'none';
 }
 
-// --- TEXTE LEGALE INTACTE ---
+// --- LOGICA PENTRU RULMENT CONTROL ---
+function toggleLegalSettings() {
+    const sCard = document.getElementById('legal-settings-card');
+    if (sCard) sCard.style.display = (sCard.style.display === 'none' || sCard.style.display === '') ? 'flex' : 'none';
+}
+
+function applyLegalVisibility(shouldSave = true) {
+    const toggles = document.querySelectorAll('#legal-toggles input');
+    const ids = ['link-terms', 'link-privacy', 'link-gdpr', 'link-security', 'link-contact'];
+    let states = [];
+    toggles.forEach((t, i) => {
+        states.push(t.checked);
+        const el = document.getElementById(ids[i]);
+        if(el) el.style.display = t.checked ? 'inline' : 'none';
+    });
+    if(shouldSave) localStorage.setItem('legalSettings', JSON.stringify(states));
+}
+
+// --- TOATE TEXTELE LEGALE INTACTE ---
 function showLegal(type) {
     const modal = document.getElementById('legalModal');
     const content = document.getElementById('legalText');
