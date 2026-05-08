@@ -132,14 +132,26 @@ function handleLogout() {
 function applySettings(shouldSave = true) {
     const toggles = document.querySelectorAll('#main-toggles input');
     
-    // MODIFICARE AICI: Primul element este acum 'reveal-wrapper'
-    const cards = [
-        document.getElementById('reveal-wrapper'), // Controlează cardul + iconițele
-        document.querySelector('.payment-card:nth-of-type(2)'),
-        document.querySelector('.payment-card:nth-of-type(3)'),
+    // Selectăm elementele exact în ordinea toggle-urilor din interfață
+    const elementsToToggle = [
+        document.getElementById('reveal-wrapper'), // 1. Website Conținut + Iconițe
+        document.querySelector('.payment-card:not(#auth-card):not(#offline-card):nth-of-type(2)'), // 2. Website Basic
+        document.querySelector('.payment-card:not(#auth-card):not(#offline-card):nth-of-type(3)'), // 3. Curriculum Vitae
+        document.getElementById('auth-card') // 4. Colaborare
+    ];
+
+    // Dacă selecția de mai sus e fragilă, folosim căutarea prin text (Fallback)
+    const allCards = document.querySelectorAll('.payment-card');
+    const basicCard = Array.from(allCards).find(c => c.innerText.includes('3.000,00 RON')) || elementsToToggle[1];
+    const cvCard = Array.from(allCards).find(c => c.innerText.includes('25,00 RON')) || elementsToToggle[2];
+
+    const finalElements = [
+        document.getElementById('reveal-wrapper'),
+        basicCard,
+        cvCard,
         document.getElementById('auth-card')
     ];
-    
+
     const offlineCard = document.getElementById('offline-card');
     const footer = document.querySelector('.footer-links');
 
@@ -149,17 +161,19 @@ function applySettings(shouldSave = true) {
     let anyActive = false;
 
     toggles.forEach((t, i) => {
-        states.push(t.checked);
-        if (cards[i]) {
-            // Dacă toggle-ul e OFF, dispare tot containerul (inclusiv iconițele)
-            cards[i].style.display = t.checked ? 'flex' : 'none';
+        states.push(t.checked); // Colectăm starea pentru salvare
+        if (finalElements[i]) {
+            finalElements[i].style.display = t.checked ? 'flex' : 'none';
             if (t.checked) anyActive = true;
         }
     });
 
-    if (shouldSave) localStorage.setItem('siteSettings', JSON.stringify(states));
+    // SALVARE ÎN LOCAL STORAGE (Forțată)
+    if (shouldSave) {
+        localStorage.setItem('siteSettings', JSON.stringify(states));
+    }
 
-    // Logica pentru modul offline rămâne neschimbată
+    // Logica ecranului Offline
     if (!anyActive) {
         if (offlineCard) offlineCard.style.display = 'flex';
         if (footer) footer.style.display = 'none';
@@ -168,6 +182,7 @@ function applySettings(shouldSave = true) {
         if (footer) footer.style.display = 'block';
     }
 }
+
 
 
 function toggleCard(index, checkbox) { applySettings(true); }
