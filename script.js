@@ -290,27 +290,44 @@ document.addEventListener('DOMContentLoaded', () => {
         mainCard.addEventListener('click', function(e) {
             if (e.target.closest('a') || e.target.closest('button')) return;
 
-            // Dacă cardul nu este deschis, îl deschidem și vibrăm
+            // Dacă cardul nu este deschis, îl deschidem
             if (!this.classList.contains('revealed')) {
                 this.classList.add('revealed');
 
                 if (isApple) {
+                    // 1. VIBRAȚIE IMEDIATĂ (Feedback haptic la atingere)
+                    // Safari cere interacțiune directă pentru a permite vibrația
+                    if ("vibrate" in navigator) {
+                        navigator.vibrate(15);
+                    }
+
                     // Așteptăm să se termine glisarea (400ms)
                     setTimeout(() => {
                         this.classList.add('vibrate-active');
-                        if ("vibrate" in navigator) navigator.vibrate(30);
 
-                        // Oprim DOAR vibrația, cardul RĂMÂNE în stânga
+                        // 2. VIBRAȚIE PALPABILĂ (Feedback la oprire)
+                        // Folosim un pattern [vibrație, pauză, vibrație] pentru intensitate
+                        if ("vibrate" in navigator) {
+                            navigator.vibrate([40, 20, 40]);
+                        }
+
+                        // Oprim animația vizuală, cardul rămâne în stânga
                         setTimeout(() => {
                             this.classList.remove('vibrate-active');
                         }, 300);
                     }, 400);
                 }
             } else {
-                // Dacă este deja deschis, la al doilea click îl închidem
+                // Închidere la al doilea click
                 this.classList.remove('revealed');
                 this.classList.remove('vibrate-active');
+                
+                // Feedback scurt și la închidere
+                if (isApple && "vibrate" in navigator) {
+                    navigator.vibrate(10);
+                }
             }
         });
     }
 });
+
