@@ -41,7 +41,6 @@ function startup() {
     }
     applySettings(false);
 
-    // Restaurare setări Control (Footer)
     const savedLegal = localStorage.getItem('legalSettings');
     const legalToggles = document.querySelectorAll('#legal-toggles input');
     if (savedLegal && legalToggles.length > 0) {
@@ -132,8 +131,10 @@ function handleLogout() {
 
 function applySettings(shouldSave = true) {
     const toggles = document.querySelectorAll('#main-toggles input');
+    
+    // MODIFICARE AICI: Primul element este acum 'reveal-wrapper'
     const cards = [
-        document.querySelector('.payment-card:nth-of-type(1)'),
+        document.getElementById('reveal-wrapper'), // Controlează cardul + iconițele
         document.querySelector('.payment-card:nth-of-type(2)'),
         document.querySelector('.payment-card:nth-of-type(3)'),
         document.getElementById('auth-card')
@@ -150,6 +151,7 @@ function applySettings(shouldSave = true) {
     toggles.forEach((t, i) => {
         states.push(t.checked);
         if (cards[i]) {
+            // Dacă toggle-ul e OFF, dispare tot containerul (inclusiv iconițele)
             cards[i].style.display = t.checked ? 'flex' : 'none';
             if (t.checked) anyActive = true;
         }
@@ -157,6 +159,7 @@ function applySettings(shouldSave = true) {
 
     if (shouldSave) localStorage.setItem('siteSettings', JSON.stringify(states));
 
+    // Logica pentru modul offline rămâne neschimbată
     if (!anyActive) {
         if (offlineCard) offlineCard.style.display = 'flex';
         if (footer) footer.style.display = 'none';
@@ -166,13 +169,14 @@ function applySettings(shouldSave = true) {
     }
 }
 
+
 function toggleCard(index, checkbox) { applySettings(true); }
+
 function toggleSettings() {
     const sCard = document.getElementById('settings-card');
     if (sCard) sCard.style.display = (sCard.style.display === 'none' || sCard.style.display === '') ? 'flex' : 'none';
 }
 
-// --- LOGICA PENTRU RULMENT CONTROL ---
 function toggleLegalSettings() {
     const sCard = document.getElementById('legal-settings-card');
     if (sCard) sCard.style.display = (sCard.style.display === 'none' || sCard.style.display === '') ? 'flex' : 'none';
@@ -278,3 +282,35 @@ function closeModal() {
 }
 
 window.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
+
+// --- NOU: LOGICA PENTRU EFECTUL DE GLISARE ȘI VIBRAȚIE PE CARD ---
+document.addEventListener('DOMContentLoaded', () => {
+    const mainCard = document.getElementById('content-card');
+    if (mainCard) {
+        mainCard.addEventListener('click', function(e) {
+            if (e.target.closest('a') || e.target.closest('button')) return;
+
+            // Dacă cardul nu este deschis, îl deschidem și vibrăm
+            if (!this.classList.contains('revealed')) {
+                this.classList.add('revealed');
+
+                if (isApple) {
+                    // Așteptăm să se termine glisarea (400ms)
+                    setTimeout(() => {
+                        this.classList.add('vibrate-active');
+                        if ("vibrate" in navigator) navigator.vibrate(30);
+
+                        // Oprim DOAR vibrația, cardul RĂMÂNE în stânga
+                        setTimeout(() => {
+                            this.classList.remove('vibrate-active');
+                        }, 300);
+                    }, 400);
+                }
+            } else {
+                // Dacă este deja deschis, la al doilea click îl închidem
+                this.classList.remove('revealed');
+                this.classList.remove('vibrate-active');
+            }
+        });
+    }
+});

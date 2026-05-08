@@ -9,23 +9,37 @@
 <body>
 
 <div class="wrapper">
-    <!-- Card Conținut -->
-    <div class="payment-card" style="margin-bottom: 20px;">
-        <h1>Website</h1>
-        <span class="price">Conținut</span>
-        <div style="color: var(--text-light); text-align: left; font-size: 14px; line-height: 1.6;">
-            <p>Această secție a site-ului îți permite să-ți scrii conținutul singur și să stabilești structura website-ului tău.</p>
-            <p>Poți începe redactarea pentru:</p>
-            <ul style="padding-left: 20px; margin-bottom: 20px;">
-                <li><strong>Meniu</strong> (paginile dorite)</li>
-                <li><strong>Conținutul de Body</strong> (textele principale)</li>
-                <li><strong>Termenii și Condițiile</strong></li>
-                <li><strong>Politica de Confidențialitate</strong></li>
-            </ul>
-            <p style="background: #f0f4f8; padding: 10px; border-radius: 8px; border-left: 4px solid var(--stripe-blue); margin-bottom: 20px;">
-                <strong>Notă:</strong> Întreg conținutul se trimite pe email imediat după finalizarea plății, moment în care se va demara procesul de încărcare și publicare a website-ului online.
-            </p>
-            <a href="redactare.html" class="stripe-button">Începeți redactarea</a>
+    <!-- Card Conținut cu efect de Reveal -->
+    <div class="card-reveal-container" id="reveal-wrapper">
+        <!-- Iconițele din spate (una sub alta) -->
+        <div class="reveal-icons">
+            <a href="https://roeid.ro" target="_blank" class="social-icon icon-roeid" title="ROeID">ROeID</a>
+            <a href="https://github.com" target="_blank" class="social-icon icon-gh" title="GitHub">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+            </a>
+            <a href="https://supabase.com" target="_blank" class="social-icon icon-sb" title="Supabase">SB</a>
+            <a href="https://resend.com" target="_blank" class="social-icon icon-rs" title="Resend">RS</a>
+            <a href="https://stripe.com" target="_blank" class="social-icon icon-st" title="Stripe">S</a>
+        </div>
+
+        <!-- Primul Card (Original Intact) -->
+        <div class="payment-card" id="content-card" style="margin-bottom: 20px;">
+            <h1>Website</h1>
+            <span class="price">Conținut</span>
+            <div style="color: var(--text-light); text-align: left; font-size: 14px; line-height: 1.6;">
+                <p>Această secție a site-ului îți permite să-ți scrii conținutul singur și să stabilești structura website-ului tău.</p>
+                <p>Poți începe redactarea pentru:</p>
+                <ul style="padding-left: 20px; margin-bottom: 20px;">
+                    <li><strong>Meniu</strong> (paginile dorite)</li>
+                    <li><strong>Conținutul de Body</strong> (textele principale)</li>
+                    <li><strong>Termenii și Condițiile</strong></li>
+                    <li><strong>Politica de Confidențialitate</strong></li>
+                </ul>
+                <p style="background: #f0f4f8; padding: 10px; border-radius: 8px; border-left: 4px solid var(--stripe-blue); margin-bottom: 20px;">
+                    <strong>Notă:</strong> Întreg conținutul se trimite pe email imediat după finalizarea plății, moment în care se va demara procesul de încărcare și publicare a website-ului online.
+                </p>
+                <a href="redactare.html" class="stripe-button">Începeți redactarea</a>
+            </div>
         </div>
     </div>
 
@@ -73,7 +87,6 @@
         </div>
     </div>
 
-    <!-- NOU: Card Control pentru Footer -->
     <div id="legal-settings-card" class="payment-card" style="display: none; margin-top: 20px; border: 1px solid var(--line-color);">
         <h2 style="font-size: 18px; margin-bottom: 15px;">Control</h2>
         <div id="legal-toggles">
@@ -85,19 +98,15 @@
         </div>
     </div>
     
-    <div class="modal-social-links" onclick="event.stopPropagation()">
-        <!-- YouTube -->
-        <a href="https://www.youtube.com/@91-Alex" target="_blank" class="social-icon icon-yt" aria-label="YouTube">
+    <div class="modal-social-links">
+        <a href="https://youtube.com/@91-Alex" target="_blank" class="social-icon icon-yt" aria-label="YouTube">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.377.505 9.377.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
         </a>
-        
-        <!-- Facebook -->
-        <a href="https://www.facebook.com/alex.m.besleaga.91" target="_blank" class="social-icon icon-fb" aria-label="Facebook">
+        <a href="https://facebook.com/alex.m.besleaga.91" target="_blank" class="social-icon icon-fb" aria-label="Facebook">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
         </a>
     </div>
 
-    <!-- Rulment principal -->
     <div class="settings-trigger" onclick="toggleSettings()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
     </div>
@@ -108,8 +117,6 @@
         <a href="javascript:void(0)" id="link-gdpr" onclick="showLegal('gdpr')">GDPR</a>
         <a href="javascript:void(0)" id="link-security" onclick="showLegal('security')">Securitate</a>
         <a href="javascript:void(0)" id="link-contact" onclick="showLegal('contact')">Contact</a>
-        
-        <!-- Rulment gri footer -->
         <span class="footer-gear" onclick="toggleLegalSettings()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </span>

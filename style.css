@@ -16,7 +16,8 @@ body.apple-device::before {
 }
 @keyframes diagSlide { from { background-position: 0 0; } to { background-position: 85px 0; } }
 
-.wrapper { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; position: relative; z-index: 1; }
+.wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; box-sizing: border-box; position: relative; z-index: 1; }
+
 .payment-card, .legal-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 15px 35px rgba(50,50,93,.1), 0 5px 15px rgba(0,0,0,.07); text-align: center; max-width: 400px; width: 100%; box-sizing: border-box; animation: fadeIn 0.3s ease-out; display: flex; flex-direction: column; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -28,7 +29,6 @@ h1, h2 { color: var(--text-dark); font-size: 24px; margin-bottom: 10px; }
 .footer-links a { color: var(--text-light); text-decoration: none; font-size: 13px; margin: 0 10px; }
 .copyright { margin-top: 20px; font-size: 12px; color: #aab7c4; }
 
-/* Rulment footer */
 .footer-gear { display: inline-flex; align-items: center; cursor: pointer; color: #aab7c4; transition: 0.3s; vertical-align: middle; }
 .footer-gear svg { width: 14px; height: 14px; }
 .footer-gear:hover { color: var(--text-light); transform: rotate(90deg); }
@@ -40,6 +40,7 @@ h1, h2 { color: var(--text-dark); font-size: 24px; margin-bottom: 10px; }
 .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: var(--bg-gray); }
 .modal-content-wrapper { display: flex; justify-content: center; align-items: center; height: 100vh; padding: 20px; }
 .legal-text-body { color: var(--text-light); line-height: 1.6; margin-bottom: 30px; text-align: left; font-size: 14px; overflow-y: auto; max-height: 50vh; }
+
 .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
@@ -48,51 +49,108 @@ input:checked + .slider { background-color: var(--stripe-blue); }
 input:checked + .slider:before { transform: translateX(18px); }
 .toggle-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
 
-/* Containerul iconițelor */
-.modal-social-links {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-    margin-top: 20px;
+.modal-social-links { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 20px; }
+.social-icon { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 50%; background-color: #ffffff; color: #444; text-decoration: none; box-shadow: 0 3px 6px rgba(0,0,0,0.1); transition: all 0.3s ease; }
+.social-icon svg { width: 20px; height: 20px; }
+.icon-yt:hover { background-color: #FF0000; color: #fff; transform: translateY(-3px); }
+.icon-fb:hover { background-color: #1877F2; color: #fff; transform: translateY(-3px); }
+
+/* --- REVEAL CARD FIXAT --- */
+.card-reveal-container { position: relative; max-width: 400px; width: 100%; margin: 0 auto 20px auto; overflow: visible; }
+.reveal-icons { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1; }
+
+#content-card {
+    position: relative;
+    z-index: 2;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    user-select: none;
+    background: white;
 }
 
-/* Stil de bază pentru butoane */
-.social-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background-color: #ffffff;
-    color: #444;
-    text-decoration: none;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+/* Poziția deschisă - forțată să rămână */
+#content-card.revealed {
+    transform: translateX(-75px) !important;
+}
+
+.reveal-icons .social-icon { filter: grayscale(1); opacity: 0.6; font-size: 11px; font-weight: bold; border: none; background: white; width: 38px; height: 38px; }
+.reveal-icons a { text-decoration: none; }
+.reveal-icons a:hover .social-icon { filter: grayscale(0); opacity: 1; transform: translateY(-3px); color: white; }
+
+.icon-roeid:hover { background-color: #003399 !important; }
+.icon-gh:hover { background-color: #333 !important; }
+.icon-sb:hover { background-color: #3ecf8e !important; }
+.icon-rs:hover { background-color: #000 !important; }
+.icon-st:hover { background-color: var(--stripe-blue) !important; }
+
+/* Animație Vibrație: Folosim margini sau un transform mic adițional */
+@keyframes haptic-vibrate {
+    0% { margin-top: 0px; }
+    25% { margin-top: 2px; }
+    50% { margin-top: -2px; }
+    75% { margin-top: 1px; }
+    100% { margin-top: 0px; }
+}
+
+.vibrate-active {
+    animation: haptic-vibrate 0.1s linear 2;
+    /* Ne asigurăm că transformarea de -75px rămâne activă în timpul vibrației */
+    transform: translateX(-75px) !important;
+}
+
+/* Stil de bază pentru pictogramele ascunse (Gri) */
+.reveal-icons .social-icon {
+    filter: grayscale(1);
+    opacity: 0.6;
     transition: all 0.3s ease;
+    background-color: #ffffff; /* Fundal alb implicit */
+    color: #444; /* Culoare iconiță implicită */
+    cursor: pointer;
 }
 
-/* Dimensiune pictograme SVG */
-.social-icon svg {
-    width: 20px;
-    height: 20px;
+/* Efecte la Hover - Apar culorile brandurilor */
+
+/* ROeID - Albastru */
+.icon-roeid:hover {
+    filter: grayscale(0) !important;
+    opacity: 1 !important;
+    background-color: #003399 !important;
+    color: #ffffff !important;
+    transform: scale(1.1);
 }
 
-/* Stil Hover YouTube */
-.icon-yt:hover {
-    background-color: #FF0000;
-    color: #fff;
-    transform: translateY(-3px);
+/* GitHub - Negru/Gri închis */
+.icon-gh:hover {
+    filter: grayscale(0) !important;
+    opacity: 1 !important;
+    background-color: #333333 !important;
+    color: #ffffff !important;
+    transform: scale(1.1);
 }
 
-/* Stil Hover Facebook */
-.icon-fb:hover {
-    background-color: #1877F2;
-    color: #fff;
-    transform: translateY(-3px);
+/* Supabase - Verde Smarald */
+.icon-sb:hover {
+    filter: grayscale(0) !important;
+    opacity: 1 !important;
+    background-color: #3ecf8e !important;
+    color: #ffffff !important;
+    transform: scale(1.1);
 }
 
-/* Efect la apăsare */
-.social-icon:active {
-    transform: scale(0.9);
+/* Resend - Negru */
+.icon-rs:hover {
+    filter: grayscale(0) !important;
+    opacity: 1 !important;
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    transform: scale(1.1);
+}
+
+/* Stripe - Albastru Stripe (folosind variabila ta) */
+.icon-st:hover {
+    filter: grayscale(0) !important;
+    opacity: 1 !important;
+    background-color: var(--stripe-blue) !important;
+    color: #ffffff !important;
+    transform: scale(1.1);
 }
