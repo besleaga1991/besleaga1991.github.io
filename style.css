@@ -52,9 +52,19 @@ input:checked + .slider:before { transform: translateX(18px); }
 .modal-social-links { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 20px; }
 .social-icon { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 50%; background-color: #ffffff; color: #444; text-decoration: none; box-shadow: 0 3px 6px rgba(0,0,0,0.1); transition: all 0.3s ease; }
 .social-icon svg { width: 20px; height: 20px; }
+
+.icon-google {
+    transition: all 0.3s ease;
+}
+
+.icon-google:hover {
+    background-color: #FBBC05 !important; /* Galben Google */
+    color: #ffffff !important;           /* G-ul alb */
+    transform: translateY(-3px);         /* Animația ta de salt */
+}
+
 .icon-yt:hover { background-color: #FF0000; color: #fff; transform: translateY(-3px); }
 .icon-fb:hover { background-color: #1877F2; color: #fff; transform: translateY(-3px); }
-
 /* --- REVEAL CARD FIXAT --- */
 .card-reveal-container { position: relative; max-width: 400px; width: 100%; margin: 0 auto 20px auto; overflow: visible; }
 .reveal-icons { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1; }
