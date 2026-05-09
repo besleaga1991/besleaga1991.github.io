@@ -330,3 +330,52 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// --- CONFIGURARE ---
+const SB_URL = 'https://supabase.co';
+const SB_KEY = 'sb_publishable_horRgs5_HGfPpHoP9uRF7w_l2t08kX6';
+
+async function updateVisitorCount() {
+    const display = document.getElementById('visitor-count');
+    if (!display) return;
+
+    try {
+        // A. Preluăm IP folosind variabila corectă pentru a evita redirecționarea (CORS friendly)
+        const ipRes = await fetch('https://ipify.org');
+        const ipData = await ipRes.json();
+        const userIP = ipData.ip;
+
+        // B. Înregistrăm vizita
+        await fetch(SB_URL, {
+            method: 'POST',
+            headers: {
+                'apikey': SB_KEY,
+                'Authorization': `Bearer ${SB_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates'
+            },
+            body: JSON.stringify({ ip_address: userIP })
+        });
+
+        // C. Citim numărul total
+        const res = await fetch(`${SB_URL}?select=*`, {
+            method: 'GET',
+            headers: {
+                'apikey': SB_KEY,
+                'Authorization': `Bearer ${SB_KEY}`
+            }
+        });
+
+        const data = await res.json();
+        if (data && Array.isArray(data)) {
+            display.innerText = data.length;
+        }
+
+    } catch (e) {
+        console.error("Așteaptă publicarea pe GitHub pentru activare.");
+        if (display.innerText === "..." || display.innerText === "0") {
+            display.innerText = "1";
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', updateVisitorCount);
