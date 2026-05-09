@@ -9,6 +9,17 @@
 <body>
 
 <div class="wrapper">
+    
+    <!-- Card Comunitate (Contor Global) -->
+    <div class="payment-card" id="counter-card" style="margin-bottom: 20px;">
+        <h1>Comunitate</h1>
+        <!-- Aici vor apărea cele 7 click-uri din Supabase -->
+        <span class="price" id="click-display">0</span>
+        <p style="color: var(--text-light); margin-bottom: 20px;">Total click-uri</p>
+        
+        <button id="counter-button" onclick="handleCounterClick()" class="stripe-button">Click</button>
+    </div>
+
     <!-- Card Conținut cu efect de Reveal -->
     <div class="card-reveal-container" id="reveal-wrapper">
         <!-- Iconițele din spate (una sub alta) -->
