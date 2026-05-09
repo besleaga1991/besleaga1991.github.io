@@ -334,7 +334,15 @@ document.addEventListener('DOMContentLoaded', () => {
 const sbUrl = 'https://bsybhrxzkdrwsewjolcy.supabase.co';
 const sbKey = 'sb_publishable_horRgs5_HGfPpHoP9uRF7w_l2t08kX6';
 
-// 1. Funcția care aduce numărul global (cele 7 click-uri) pe site
+// Funcție utilitară pentru a bloca butonul vizual
+function disableButtonVisuals(btn) {
+    btn.innerText = "Înregistrat";
+    btn.style.backgroundColor = "#e6ebf1";
+    btn.style.color = "#aab7c4";
+    btn.style.cursor = "not-allowed";
+    btn.disabled = true;
+}
+
 async function fetchGlobalClicks() {
     const display = document.getElementById('click-display');
     if (!display) return;
@@ -350,8 +358,6 @@ async function fetchGlobalClicks() {
         });
 
         const data = await res.json();
-
-        // Luăm prima intrare din lista [ {click_count: 7} ]
         if (data && data.length > 0) {
             display.innerText = data[0].click_count;
         }
@@ -360,18 +366,16 @@ async function fetchGlobalClicks() {
     }
 }
 
-// 2. Funcția care se execută când dai tap/click pe buton
 async function handleCounterClick() {
     const btn = document.getElementById('counter-button');
     const display = document.getElementById('click-display');
 
-    if (btn.disabled) return;
+    if (btn.disabled || localStorage.getItem('hasClicked')) return;
 
     btn.innerText = "Se trimite...";
     btn.disabled = true;
 
     try {
-        // Incrementăm în baza de date (RPC)
         const response = await fetch(`${sbUrl}/rest/v1/rpc/increment_clicks`, {
             method: 'POST',
             headers: {
@@ -383,15 +387,12 @@ async function handleCounterClick() {
         });
 
         if (response.ok) {
-            // Actualizăm cifra de pe ecran (număr curent + 1)
             const currentVal = parseInt(display.innerText) || 0;
             display.innerText = currentVal + 1;
 
-            // Blocăm butonul vizual până la următorul refresh
-            btn.innerText = "Înregistrat";
-            btn.style.backgroundColor = "#e6ebf1";
-            btn.style.color = "#aab7c4";
-            btn.style.cursor = "not-allowed";
+            // Salvează în local storage și blochează butonul
+            localStorage.setItem('hasClicked', 'true');
+            disableButtonVisuals(btn);
         } else {
             btn.innerText = "Eroare!";
             btn.disabled = false;
@@ -403,8 +404,16 @@ async function handleCounterClick() {
     }
 }
 
-// 3. Executăm încărcarea datelor când se deschide site-ul
-document.addEventListener('DOMContentLoaded', fetchGlobalClicks);
+// Inițializare la încărcarea paginii
+document.addEventListener('DOMContentLoaded', () => {
+    fetchGlobalClicks();
+    
+    const btn = document.getElementById('counter-button');
+    // Verificăm dacă utilizatorul a votat deja în trecut
+    if (localStorage.getItem('hasClicked') === 'true' && btn) {
+        disableButtonVisuals(btn);
+    }
+});
 
-// Opțional: Actualizare automată la fiecare 10 secunde pentru a vedea click-urile altora
 setInterval(fetchGlobalClicks, 10000);
+
