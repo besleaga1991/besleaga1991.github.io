@@ -87,7 +87,6 @@ input:checked + .slider:before { transform: translateX(18px); }
 .reveal-icons a { text-decoration: none; }
 .reveal-icons a:hover .social-icon { filter: grayscale(0); opacity: 1; transform: translateY(-3px); color: white; }
 
-.icon-roeid:hover { background-color: #003399 !important; }
 .icon-gh:hover { background-color: #333 !important; }
 .icon-sb:hover { background-color: #3ecf8e !important; }
 .icon-rs:hover { background-color: #000 !important; }
@@ -119,15 +118,6 @@ input:checked + .slider:before { transform: translateX(18px); }
 }
 
 /* Efecte la Hover - Apar culorile brandurilor */
-
-/* ROeID - Albastru */
-.icon-roeid:hover {
-    filter: grayscale(0) !important;
-    opacity: 1 !important;
-    background-color: #003399 !important;
-    color: #ffffff !important;
-    transform: scale(1.1);
-}
 
 /* GitHub - Negru/Gri închis */
 .icon-gh:hover {
