@@ -154,3 +154,20 @@ input:checked + .slider:before { transform: translateX(18px); }
     color: #ffffff !important;
     transform: scale(1.1);
 }
+
+/* Eliminăm fundalul alb al containerului principal de modal pentru a lăsa cardurile interioare să fie vizibile individual */
+#legalModal .modal-content-wrapper .legal-card {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    max-width: 400px;
+    width: 100%;
+}
+
+/* Forțăm așezarea verticală a cardurilor din interior */
+#legalText {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}

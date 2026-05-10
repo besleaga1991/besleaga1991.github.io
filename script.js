@@ -275,16 +275,49 @@ function showLegal(type) {
             </div>`;
     } else if(type === 'contact') {
         content.innerHTML = `
-            <h2>Contact</h2>
-            <div class="legal-text-body">
-                Bine ați venit! Vă rog să utilizați aceste date exclusiv în <strong>scop profesional</strong>, pentru solicitări legate de serviciile web oferite. Mesajele care încalcă normele de conviețuire socială vor fi ignorate.<br><br>
-                <strong>Nume:</strong> ${name}<br>
-                <strong>E-mail:</strong> <a href="mailto:besleaga.1991@icloud.com" style="color: var(--stripe-blue)">besleaga.1991@icloud.com</a><br>
-                <strong>Telefon:</strong> +40 725 500 865<br><br>
-                <strong>Adrese de corespondență:</strong><br>
-                • Str. Foișorului Nr. 4<br>
-                • Bulevardul Pipera Tunari 152 - 156
-            </div>`;
+            <div style="display: flex; flex-direction: column; align-items: center; width: 100%; gap: 20px;">
+                
+                <!-- PRIMUL CARD: Contact -->
+                <div class="payment-card" style="text-align: left; width: 100%; max-width: 400px; margin-bottom: 0;">
+                    <h1>Contact</h1>
+                    <div style="color: var(--text-light); font-size: 14px; line-height: 1.6; margin-bottom: 25px;">
+                        <strong>Nume:</strong> ${name}<br>
+                        <strong>E-mail:</strong> <a href="mailto:besleaga.1991@icloud.com" style="color: var(--stripe-blue)">besleaga.1991@icloud.com</a><br>
+                        <strong>Telefon:</strong> +40 725 500 865<br><br>
+                        <strong>Adrese:</strong> Str. Foișorului Nr. 4 / Bvd. Pipera Tunari 152-156
+                    </div>
+                    <button class="close-button" onclick="closeModal()">Am înțeles</button>
+                </div>
+
+                <!-- AL DOILEA CARD: Doar Solicitare Date -->
+                <div class="payment-card" style="text-align: left; width: 100%; max-width: 400px; margin-bottom: 0;">
+                    <h1>Solicitare Date</h1>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 20px;">
+                        <label style="font-size: 12px; color: var(--text-light);">Nume și Prenume</label>
+                        <input type="text" id="db-nume" placeholder="Popescu Ion" class="form-input">
+                        
+                        <label style="font-size: 12px; color: var(--text-light);">Adresa</label>
+                        <input type="text" id="db-adresa" placeholder="Strada, Număr, Oraș" class="form-input">
+                        
+                        <label style="font-size: 12px; color: var(--text-light);">Număr de Telefon</label>
+                        <input type="tel" id="db-telefon" placeholder="07xx xxx xxx" class="form-input">
+                        
+                        <label style="font-size: 12px; color: var(--text-light);">E-mail</label>
+                        <input type="email" id="db-email" placeholder="nume@exemplu.com" class="form-input">
+                        
+                        <button onclick="saveLeadToDatabase()" id="btn-save-lead" class="stripe-button" style="width: 100%; margin-top: 15px;">Trimite Datele</button>
+                        <p id="save-status" style="font-size: 11px; text-align: center; margin-top: 10px; color: var(--text-light);"></p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Curățare buton extra de sub carduri
+        const extraButtons = document.querySelectorAll('#legalModal > .modal-content-wrapper > .close-button, #legalModal .legal-card > .close-button');
+        extraButtons.forEach(btn => {
+            if (!btn.closest('.payment-card')) btn.style.display = 'none';
+        });
     }
     
     modal.style.display = 'block';
@@ -417,3 +450,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
 setInterval(fetchGlobalClicks, 10000);
 
+async function saveLeadToDatabase() {
+    const btn = document.getElementById('btn-save-lead');
+    const cardContent = btn.closest('.payment-card'); // Identificăm cardul al doilea
+    
+    const data = {
+        full_name: document.getElementById('db-nume').value.trim(),
+        address: document.getElementById('db-adresa').value.trim(),
+        phone: document.getElementById('db-telefon').value.trim(),
+        email: document.getElementById('db-email').value.trim()
+    };
+
+    if (!data.full_name || !data.email) {
+        alert("Numele și Email-ul sunt obligatorii.");
+        return;
+    }
+
+    btn.innerText = "Se trimite...";
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(`${sbUrl}/rest/v1/leads`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': sbKey,
+                'Authorization': `Bearer ${sbKey}`
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            // Aici se întâmplă magia: golim cardul și scriem doar mesajul tău
+            cardContent.innerHTML = `
+                <div style="text-align: center; padding: 40px 0;">
+                    <h1 style="color: #3ecf8e;">✔</h1>
+                    <p style="font-size: 18px; color: var(--text-dark); font-weight: 600;">Mulțumim pentru date.</p>
+                </div>
+            `;
+            
+            // Închidem tot modalul automat după 3 secunde
+            setTimeout(() => { closeModal(); }, 3000);
+        } else {
+            throw new Error();
+        }
+    } catch (err) {
+        btn.innerText = "Eroare rețea";
+        btn.disabled = false;
+    }
+}
