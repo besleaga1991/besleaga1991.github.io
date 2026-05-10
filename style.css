@@ -37,9 +37,10 @@ h1, h2 { color: var(--text-dark); font-size: 24px; margin-bottom: 10px; }
 .settings-trigger svg { width: 18px; height: 18px; }
 .settings-trigger:hover { color: var(--stripe-blue); transform: rotate(90deg); }
 
-.modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: var(--bg-gray); }
-.modal-content-wrapper { display: flex; justify-content: center; align-items: center; height: 100vh; padding: 20px; }
-.legal-text-body { color: var(--text-light); line-height: 1.6; margin-bottom: 30px; text-align: left; font-size: 14px; overflow-y: auto; max-height: 50vh; }
+/* --- OPTIMIZARE MODAL PENTRU SCROLL NATIV PE IPHONE --- */
+.modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: var(--bg-gray); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.modal-content-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+.legal-text-body { color: var(--text-light); line-height: 1.6; margin-bottom: 30px; text-align: left; font-size: 14px; }
 
 .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
 .switch input { opacity: 0; width: 0; height: 0; }
@@ -53,35 +54,17 @@ input:checked + .slider:before { transform: translateX(18px); }
 .social-icon { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 50%; background-color: #ffffff; color: #444; text-decoration: none; box-shadow: 0 3px 6px rgba(0,0,0,0.1); transition: all 0.3s ease; }
 .social-icon svg { width: 20px; height: 20px; }
 
-.icon-google {
-    transition: all 0.3s ease;
-}
-
-.icon-google:hover {
-    background-color: #FBBC05 !important; /* Galben Google */
-    color: #ffffff !important;           /* G-ul alb */
-    transform: translateY(-3px);         /* Animația ta de salt */
-}
-
+.icon-google { transition: all 0.3s ease; }
+.icon-google:hover { background-color: #FBBC05 !important; color: #ffffff !important; transform: translateY(-3px); }
 .icon-yt:hover { background-color: #FF0000; color: #fff; transform: translateY(-3px); }
 .icon-fb:hover { background-color: #1877F2; color: #fff; transform: translateY(-3px); }
+
 /* --- REVEAL CARD FIXAT --- */
 .card-reveal-container { position: relative; max-width: 400px; width: 100%; margin: 0 auto 20px auto; overflow: visible; }
 .reveal-icons { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1; }
 
-#content-card {
-    position: relative;
-    z-index: 2;
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    cursor: pointer;
-    user-select: none;
-    background: white;
-}
-
-/* Poziția deschisă - forțată să rămână */
-#content-card.revealed {
-    transform: translateX(-75px) !important;
-}
+#content-card { position: relative; z-index: 2; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; user-select: none; background: white; }
+#content-card.revealed { transform: translateX(-75px) !important; }
 
 .reveal-icons .social-icon { filter: grayscale(1); opacity: 0.6; font-size: 11px; font-weight: bold; border: none; background: white; width: 38px; height: 38px; }
 .reveal-icons a { text-decoration: none; }
@@ -92,7 +75,6 @@ input:checked + .slider:before { transform: translateX(18px); }
 .icon-rs:hover { background-color: #000 !important; }
 .icon-st:hover { background-color: var(--stripe-blue) !important; }
 
-/* Animație Vibrație: Folosim margini sau un transform mic adițional */
 @keyframes haptic-vibrate {
     0% { margin-top: 0px; }
     25% { margin-top: 2px; }
@@ -100,74 +82,22 @@ input:checked + .slider:before { transform: translateX(18px); }
     75% { margin-top: 1px; }
     100% { margin-top: 0px; }
 }
+.vibrate-active { animation: haptic-vibrate 0.1s linear 2; transform: translateX(-75px) !important; }
 
-.vibrate-active {
-    animation: haptic-vibrate 0.1s linear 2;
-    /* Ne asigurăm că transformarea de -75px rămâne activă în timpul vibrației */
-    transform: translateX(-75px) !important;
+.reveal-icons .social-icon { filter: grayscale(1); opacity: 0.6; transition: all 0.3s ease; background-color: #ffffff; color: #444; cursor: pointer; }
+.icon-gh:hover { filter: grayscale(0) !important; opacity: 1 !important; background-color: #333333 !important; color: #ffffff !important; transform: scale(1.1); }
+.icon-sb:hover { filter: grayscale(0) !important; opacity: 1 !important; background-color: #3ecf8e !important; color: #ffffff !important; transform: scale(1.1); }
+.icon-rs:hover { filter: grayscale(0) !important; opacity: 1 !important; background-color: #000000 !important; color: #ffffff !important; transform: scale(1.1); }
+.icon-st:hover { filter: grayscale(0) !important; opacity: 1 !important; background-color: var(--stripe-blue) !important; color: #ffffff !important; transform: scale(1.1); }
+
+/* --- MODIFICĂRI ELIMINARE UMBRE MODAL ȘI STRUCTURĂ VERTICALĂ --- */
+#legalModal .modal-content-wrapper .legal-card { background: transparent !important; box-shadow: none !important; padding: 0 !important; max-width: 400px; width: 100%; }
+#legalModal .payment-card { box-shadow: none !important; }
+#legalText { display: flex; flex-direction: column; align-items: center; width: 100%; }
+
+/* --- INPUTURI FORMULAR SOLICITARE DATE --- */
+.form-input {
+    width: 100%; padding: 12px; border: 1px solid #e6ebf1; border-radius: 8px;
+    box-sizing: border-box; margin-bottom: 12px; font-size: 14px; background-color: #fcfdfd; transition: all 0.2s ease;
 }
-
-/* Stil de bază pentru pictogramele ascunse (Gri) */
-.reveal-icons .social-icon {
-    filter: grayscale(1);
-    opacity: 0.6;
-    transition: all 0.3s ease;
-    background-color: #ffffff; /* Fundal alb implicit */
-    color: #444; /* Culoare iconiță implicită */
-    cursor: pointer;
-}
-
-/* Efecte la Hover - Apar culorile brandurilor */
-
-/* GitHub - Negru/Gri închis */
-.icon-gh:hover {
-    filter: grayscale(0) !important;
-    opacity: 1 !important;
-    background-color: #333333 !important;
-    color: #ffffff !important;
-    transform: scale(1.1);
-}
-
-/* Supabase - Verde Smarald */
-.icon-sb:hover {
-    filter: grayscale(0) !important;
-    opacity: 1 !important;
-    background-color: #3ecf8e !important;
-    color: #ffffff !important;
-    transform: scale(1.1);
-}
-
-/* Resend - Negru */
-.icon-rs:hover {
-    filter: grayscale(0) !important;
-    opacity: 1 !important;
-    background-color: #000000 !important;
-    color: #ffffff !important;
-    transform: scale(1.1);
-}
-
-/* Stripe - Albastru Stripe (folosind variabila ta) */
-.icon-st:hover {
-    filter: grayscale(0) !important;
-    opacity: 1 !important;
-    background-color: var(--stripe-blue) !important;
-    color: #ffffff !important;
-    transform: scale(1.1);
-}
-
-/* Eliminăm fundalul alb al containerului principal de modal pentru a lăsa cardurile interioare să fie vizibile individual */
-#legalModal .modal-content-wrapper .legal-card {
-    background: transparent !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    max-width: 400px;
-    width: 100%;
-}
-
-/* Forțăm așezarea verticală a cardurilor din interior */
-#legalText {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-}
+.form-input:focus { border-color: var(--stripe-blue); background-color: #ffffff; box-shadow: 0 1px 3px rgba(50,50,93,.05); outline: none; }

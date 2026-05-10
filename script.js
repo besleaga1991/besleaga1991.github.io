@@ -142,8 +142,8 @@ function applySettings(shouldSave = true) {
 
     // Dacă selecția de mai sus e fragilă, folosim căutarea prin text (Fallback)
     const allCards = document.querySelectorAll('.payment-card');
-    const basicCard = Array.from(allCards).find(c => c.innerText.includes('3.000,00 RON')) || elementsToToggle[1];
-    const cvCard = Array.from(allCards).find(c => c.innerText.includes('25,00 RON')) || elementsToToggle[2];
+    const basicCard = Array.from(allCards).find(c => c.innerText.includes('3.000,00 RON')) || elementsToToggle;
+    const cvCard = Array.from(allCards).find(c => c.innerText.includes('25,00 RON')) || elementsToToggle;
 
     const finalElements = [
         document.getElementById('reveal-wrapper'),
@@ -183,8 +183,6 @@ function applySettings(shouldSave = true) {
     }
 }
 
-
-
 function toggleCard(index, checkbox) { applySettings(true); }
 
 function toggleSettings() {
@@ -214,10 +212,21 @@ function showLegal(type) {
     const modal = document.getElementById('legalModal');
     const content = document.getElementById('legalText');
     
+    // Optimizarea eliminării înălțimilor maxime pentru funcționarea scroll-ului nativ pe ecranul iPhone-ului
+    content.style.maxHeight = 'none';
+    content.style.overflowY = 'visible';
+
+    // Fundație tip card standardizată pentru restul ferestrelor (fără umbră inline)
+    let cardWrapperStart = `<div style="display: flex; flex-direction: column; align-items: center; width: 100%; gap: 20px; padding-bottom: 30px;">
+                            <div class="payment-card" style="text-align: left; width: 100%; max-width: 400px; margin-bottom: 0; flex-shrink: 0; box-shadow: none !important;">`;
+    
+    // MODIFICARE CONFIRMATĂ: Un singur buton „Am înțeles” adăugat nativ în interiorul cardurilor
+    let cardWrapperEnd = `<button class="close-button" onclick="closeModal()" style="margin-top: 25px; width: 100%;">Am înțeles</button></div></div>`;
+    
     if(type === 'terms') {
-        content.innerHTML = `
+        content.innerHTML = cardWrapperStart + `
             <h2>Termeni și Condiții</h2>
-            <div class="legal-text-body">
+            <div class="legal-text-body" style="margin-bottom: 25px;">
                 <strong>1. Definiția „Website”:</strong> Produsul final reprezintă o colecție organizată de texte și imagini, structurată corespunzător conform cerințelor solicitate de client. <br><br>
                 <strong>2. Structura Tehnică:</strong><br>
                 • <strong>Header:</strong> Secțiunea superioară (navigare și logo).<br>
@@ -225,60 +234,66 @@ function showLegal(type) {
                 • <strong>Footer:</strong> Secțiunea inferioară pentru date legale.<br><br>
                 <strong>3. Specificații:</strong> Include între 1 și 5 pagini, meniu, conținut, Termeni și Condiții și Politica de Confidențialitate.<br><br>
                 <strong>4. Livrare:</strong> Plata reprezintă acceptul începerii lucrului. Termenul de livrare este de <strong>31 de zile</strong>, produsul fiind predat la sfârșitul primei luni de activitate (începutul lunii a doua).
-            </div>`;
+            </div>
+        ` + cardWrapperEnd;
     } else if(type === 'privacy') {
-        content.innerHTML = `
+        content.innerHTML = cardWrapperStart + `
             <h2>Politică de Confidențialitate</h2>
-            <div class="legal-text-body">
+            <div class="legal-text-body" style="margin-bottom: 25px;">
                 Datele sunt procesate securizat prin Stripe. Nu stocăm informații bancare; toate plățile sunt gestionate prin <strong>Power of Stripe</strong>.<br><br>
                 Acest serviciu respectă normele impuse de <span style="color:var(--stripe-blue);cursor:pointer;text-decoration:underline" onclick="showLegal('law')">Legea 365/2002</span> privind comerțul electronic.<br><br>
                 E-mailul dvs. este folosit doar pentru facturare și comunicare tehnică.
-            </div>`;
+            </div>
+        ` + cardWrapperEnd;
     } else if(type === 'gdpr') {
-        content.innerHTML = `
+        content.innerHTML = cardWrapperStart + `
             <h2>Protecția Datelor (GDPR)</h2>
-            <div class="legal-text-body">
+            <div class="legal-text-body" style="margin-bottom: 25px;">
                 Conform <strong>Regulamentului (UE) 2016/679 (GDPR)</strong>, vă informăm asupra drepturilor privind protecția datelor cu caracter personal:<br><br>
                 <strong>1. Drepturile Persoanei Vizate:</strong> Aveți dreptul de acces la date (Art. 15), dreptul la rectificare (Art. 16), dreptul la ștergerea datelor (Art. 17) și dreptul la restricționarea prelucrării (Art. 18).<br><br>
                 <strong>2. Temeiul Juridic:</strong> Prelucrarea este necesară pentru executarea unui contract la care persoana vizată este parte sau pentru a face demersuri la cererea persoanei vizate înainte de încheierea unui contract (Art. 6, alin. 1, lit. b).<br><br>
                 <strong>3. Portabilitatea și Opoziția:</strong> Aveți dreptul de a primi datele într-un format structurat și dreptul de a vă opune prelucrării în orice moment din motive legate de situația dvs. particulară.<br><br>
                 <strong>4. Autoritatea de Supraveghere:</strong> Aveți dreptul de a depune o plângere la ANSPDCP în cazul în care considerați că prelucrarea încalcă prevederile legale în vigoare.
-            </div>`;
+            </div>
+        ` + cardWrapperEnd;
     } else if(type === 'security') {
-        content.innerHTML = `
+        content.innerHTML = cardWrapperStart + `
             <h2>Securitate</h2>
-            <div class="legal-text-body">
-                Siguranța datelor este integrată în ecosistemul nostru de lucru. În conformitate cu politicile de protecție a informațiilor, utilizăm exclusiv sisteme de operare <strong>iOS, macOS, watchOS,tvOS și visionOS </strong> pentru prelucrarea datelor cu caracter personal ale clienților.<br><br>
+            <div class="legal-text-body" style="margin-bottom: 25px;">
+                Sigranța datelor este integrată în ecosistemul nostru de lucru. În conformitate cu politicile de protecție a informațiilor, utilizăm exclusiv siateme de operare <strong>iOS, macOS, watchOS,tvOS și visionOS </strong> pentru prelucrarea datelor cu caracter personal ale clienților.<br><br>
                 <strong>Angajamentul de securitate:</strong><br>
-                • Procesarea se realizează într-un mediu controlat, beneficiind de criptarea nativă a dispozitivelor Apple.<br>
+                • Processarea se realizează într-un mediu controlat, beneficiind de criptarea nativă a dispozitivelor Apple.<br>
                 • Standardele de securitate aplicate sunt conforme cu cerințele tehnice prezentate pe <a href="https://apple.com" target="_blank" style="color: var(--stripe-blue)">https://apple.com</a>.<br>
                 • Datele dvs. sunt accesate și gestionate prin protocoale stricte de autentificare pentru a preveni orice intervenție neautorizată.<br><br>
                 Prin accesarea serviciilor noastre, vă exprimați consimțământul pentru gestionarea informațiilor în acest cadru tehnologic securizat.
-            </div>`;
+            </div>
+        ` + cardWrapperEnd;
     } else if(type === 'law') {
-        content.innerHTML = `
+        content.innerHTML = cardWrapperStart + `
             <h2>Legea 365/2002</h2>
-            <div class="legal-text-body">
+            <div class="legal-text-body" style="margin-bottom: 25px;">
                 <strong>Art. 4: Libera circulație</strong> - Furnizarea de servicii ale societății informaționale este liberă și nu este supusă niciunei autorizări prealabile.<br><br>
-                <strong>Art. 7: Informarea consumatorului</strong> - Prestatorul are obligația de a afișa datele de identificare, e-mailul și tarifele serviciilor.<br><br>
+                <strong>Art. 7: Informarea consumatorului</strong> - Prestatorul area obligația de a afișa datele de identificare, e-mailul și tarifele serviciilor.<br><br>
                 <strong>Art. 9: Contracte electronice</strong> - Contractele încheiate prin mijloace electronice produc toate efectele legale ale unui contract sub semnătură privată.<br><br>
                 <span style="color:var(--stripe-blue);cursor:pointer;text-decoration:underline" onclick="showLegal('fiscal')">Consultă obligațiile fiscale (ANAF)</span>
-            </div>`;
+            </div>
+        ` + cardWrapperEnd;
     } else if(type === 'fiscal') {
-        content.innerHTML = `
+        content.innerHTML = cardWrapperStart + `
             <h2>Obligații Fiscale (ANAF)</h2>
-            <div class="legal-text-body">
+            <div class="legal-text-body" style="margin-bottom: 25px;">
                 <strong>Conform Codului Fiscal (Legea 227/2015):</strong><br><br>
                 <strong>Art. 120:</strong> Prestatorul are obligația de a depune <strong>Declarația Unică</strong> privind impozitul pe venit și contribuțiile sociale datorate de persoanele fizice.<br><br>
                 <strong>Art. 122:</strong> Veniturile nete din activități independente sunt supuse impozitării și contribuțiilor (CAS, CASS) conform plafoanelor legale.<br><br>
                 Monitorizarea electronică a plăților asigură transparența totală a veniturilor raportate către bugetul de stat.
-            </div>`;
+            </div>
+        ` + cardWrapperEnd;
     } else if(type === 'contact') {
         content.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; width: 100%; gap: 20px;">
                 
                 <!-- PRIMUL CARD: Contact -->
-                <div class="payment-card" style="text-align: left; width: 100%; max-width: 400px; margin-bottom: 0;">
+                <div class="payment-card" style="text-align: left; width: 100%; max-width: 400px; margin-bottom: 0; flex-shrink: 0; box-shadow: none !important;">
                     <h1>Contact</h1>
                     <div style="color: var(--text-light); font-size: 14px; line-height: 1.6; margin-bottom: 25px;">
                         <strong>Nume:</strong> ${name}<br>
@@ -290,7 +305,7 @@ function showLegal(type) {
                 </div>
 
                 <!-- AL DOILEA CARD: Doar Solicitare Date -->
-                <div class="payment-card" style="text-align: left; width: 100%; max-width: 400px; margin-bottom: 0;">
+                <div class="payment-card" style="text-align: left; width: 100%; max-width: 400px; margin-bottom: 0; flex-shrink: 0; box-shadow: none !important;">
                     <h1>Solicitare Date</h1>
                     
                     <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 20px;">
@@ -313,7 +328,7 @@ function showLegal(type) {
             </div>
         `;
 
-        // Curățare buton extra de sub carduri
+        // Curățare forțată a butoanelor fantomă orfane de sub carduri din HTML
         const extraButtons = document.querySelectorAll('#legalModal > .modal-content-wrapper > .close-button, #legalModal .legal-card > .close-button');
         extraButtons.forEach(btn => {
             if (!btn.closest('.payment-card')) btn.style.display = 'none';
@@ -321,17 +336,25 @@ function showLegal(type) {
     }
     
     modal.style.display = 'block';
+    
+    // Forțăm modalul să preia scroll-ul general nativ pe iPhone
+    modal.style.overflowY = 'auto';
+    modal.style.webkitOverflowScrolling = 'touch';
     document.body.style.overflow = 'hidden';
 }
 
 function closeModal() {
-    document.getElementById('legalModal').style.display = 'none';
+    const modal = document.getElementById('legalModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.style.overflowY = '';
+    }
     document.body.style.overflow = 'auto';
 }
 
 window.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
 
-// --- NOU: LOGICA PENTRU EFECTUL DE GLISARE ȘI VIBRAȚIE PE CARD ---
+// --- PENTRU EFECTUL DE GLISARE ȘI VIBRAȚIE PE CARD ---
 document.addEventListener('DOMContentLoaded', () => {
     const mainCard = document.getElementById('content-card');
     if (mainCard) {
@@ -481,7 +504,7 @@ async function saveLeadToDatabase() {
         });
 
         if (response.ok) {
-            // Aici se întâmplă magia: golim cardul și scriem doar mesajul tău
+            // Înlocuim conținutul din cardul al doilea cu bifa de succes
             cardContent.innerHTML = `
                 <div style="text-align: center; padding: 40px 0;">
                     <h1 style="color: #3ecf8e;">✔</h1>
