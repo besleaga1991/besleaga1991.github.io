@@ -218,7 +218,7 @@ function applyLegalVisibility(shouldSave = true) {
 }
 
 // --- TOATE TEXTELE LEGALE INTACTE ---
-function showLegal(type) {
+async function showLegal(type) {
     const modal = document.getElementById('legalModal');
     const content = document.getElementById('legalText');
     
@@ -299,11 +299,15 @@ function showLegal(type) {
             </div>
         ` + cardWrapperEnd;
     } else if(type === 'contact') {
+        // --- MODIFICARE REFRESH: Verificare instantă în LocalStorage ---
+        const userEmail = localStorage.getItem('submittedEmail');
+        let isUnlocked = (userEmail !== null && userEmail !== "");
+
         content.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; width: 100%; gap: 20px;">
                 
                 <!-- PRIMUL CARD: Contact -->
-                <div class="payment-card" style="text-align: left; width: 100%; max-width: 400px; margin-bottom: 0; flex-shrink: 0; box-shadow: none !important;">
+                <div id="contact-card-real" class="payment-card" style="display: ${isUnlocked ? 'flex' : 'none'}; text-align: left; width: 100%; max-width: 400px; margin-bottom: 0; flex-shrink: 0; box-shadow: none !important;">
                     <h1>Contact</h1>
                     <div style="color: var(--text-light); font-size: 14px; line-height: 1.6; margin-bottom: 25px;">
                         <strong>Nume:</strong> ${name}<br>
@@ -314,7 +318,7 @@ function showLegal(type) {
                     <button class="close-button" onclick="closeModal()">Am înțeles</button>
                 </div>
 
-                <!-- AL DOILEA CARD: Doar Solicitare Date -->
+                <!-- AL DOILEA CARD: Solicitare Date (Rămâne neschimbat) -->
                 <div class="payment-card" style="text-align: left; width: 100%; max-width: 400px; margin-bottom: 0; flex-shrink: 0; box-shadow: none !important;">
                     <h1>Solicitare Date</h1>
                     
@@ -338,7 +342,6 @@ function showLegal(type) {
             </div>
         `;
 
-        // Curățare forțată a butoanelor fantomă orfane de sub carduri din HTML
         const extraButtons = document.querySelectorAll('#legalModal > .modal-content-wrapper > .close-button, #legalModal .legal-card > .close-button');
         extraButtons.forEach(btn => {
             if (!btn.closest('.payment-card')) btn.style.display = 'none';
@@ -346,12 +349,13 @@ function showLegal(type) {
     }
     
     modal.style.display = 'block';
-    
-    // Forțăm modalul să preia scroll-ul general nativ pe iPhone
     modal.style.overflowY = 'auto';
     modal.style.webkitOverflowScrolling = 'touch';
     document.body.style.overflow = 'hidden';
 }
+
+
+
 
 function closeModal() {
     const modal = document.getElementById('legalModal');
@@ -485,16 +489,10 @@ setInterval(fetchGlobalClicks, 10000);
 
 async function saveLeadToDatabase() {
     const btn = document.getElementById('btn-save-lead');
-    const cardContent = btn.closest('.payment-card'); // Identificăm cardul al doilea
-    
-    const data = {
-        full_name: document.getElementById('db-nume').value.trim(),
-        address: document.getElementById('db-adresa').value.trim(),
-        phone: document.getElementById('db-telefon').value.trim(),
-        email: document.getElementById('db-email').value.trim()
-    };
+    const emailVal = document.getElementById('db-email').value.trim();
+    const nameVal = document.getElementById('db-nume').value.trim();
 
-    if (!data.full_name || !data.email) {
+    if (!emailVal || !nameVal) {
         alert("Numele și Email-ul sunt obligatorii.");
         return;
     }
@@ -510,25 +508,35 @@ async function saveLeadToDatabase() {
                 'apikey': sbKey,
                 'Authorization': `Bearer ${sbKey}`
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                full_name: nameVal,
+                email: emailVal,
+                address: document.getElementById('db-adresa').value.trim(),
+                phone: document.getElementById('db-telefon').value.trim()
+            })
         });
 
         if (response.ok) {
-            // Înlocuim conținutul din cardul al doilea cu bifa de succes
-            cardContent.innerHTML = `
-                <div style="text-align: center; padding: 40px 0;">
-                    <h1 style="color: #3ecf8e;">✔</h1>
-                    <p style="font-size: 18px; color: var(--text-dark); font-weight: 600;">Mulțumim pentru date.</p>
-                </div>
-            `;
+            // 1. Salvăm email-ul în Local Storage pentru ca deblocarea să fie permanentă
+            localStorage.setItem('submittedEmail', emailVal);
             
-            // Închidem tot modalul automat după 3 secunde
-            setTimeout(() => { closeModal(); }, 3000);
+            // 2. Afișăm instantaneu cardul tău de contact (cel de sus)
+            const contactCard = document.getElementById('contact-card-real');
+            if (contactCard) {
+                contactCard.style.display = 'flex';
+                contactCard.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // 3. Resetăm butonul la starea inițială (Violet, text original)
+            btn.innerText = "Trimite Datele";
+            btn.disabled = false;
         } else {
             throw new Error();
         }
     } catch (err) {
-        btn.innerText = "Eroare rețea";
+        alert("Eroare de conexiune.");
+        btn.innerText = "Trimite Datele";
         btn.disabled = false;
     }
 }
+
