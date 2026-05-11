@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .saved-note-title {
+            font-size: 18px;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .saved-note-body {
+            color: var(--text-light);
+            line-height: 1.6;
+            font-size: 14px;
+            text-align: left;
+            word-break: break-word;
+            white-space: pre-wrap;
+            margin-bottom: 20px;
+        }
+        #notes-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .input-title-field {
+            border: 1px solid #e6ebf1;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: inherit;
+            text-align: center;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <!-- PRIMUL CARD: Profilul Utilizatorului -->
+    <div class="payment-card" style="max-width: 450px; margin-bottom: 20px;">
+        <h1>Colaborator</h1>
+        <span class="price" id="user-email-display" style="font-size: 16px; margin-bottom: 25px;">Incarcare...</span>
+        
+        <button onclick="handleDashboardLogout()" class="stripe-button" style="background-color: var(--stripe-blue); color: white; margin-top: 10px;">
+            Log out
+        </button>
+    </div>
+
+    <!-- AL DOILEA CARD: Editor Notițe -->
+    <div class="payment-card" style="max-width: 450px; margin-bottom: 20px;">
+        <h2>Scriere</h2>
+        <p style="color: var(--text-light); font-size: 13px; margin-bottom: 20px;">Scrieți un titlu și un text scurt (maximum 100 de cuvinte).</p>
+        
+        <!-- Input pentru Titlu Personalizat -->
+        <input type="text" id="note-title" class="input-title-field" placeholder="Introduceți titlul notiței...">
+        
+        <!-- Zona pentru Conținut -->
+        <textarea id="note-text" placeholder="Scrie ceva aici..." oninput="validateWordCount(this)"
+                  style="border: 1px solid #e6ebf1; border-radius: 8px; padding: 15px; width: 100%; height: 120px; box-sizing: border-box; font-family: inherit; resize: none; line-height: 1.6; outline: none; margin-bottom: 20px;"></textarea>
+        
+        <button onclick="savePersonalNote()" class="stripe-button" style="background-color: var(--stripe-blue); color: white; width: 100%;">
+            Salvează ce ai scris
+        </button>
+    </div>
+
+    <!-- ZONA UNDE APAR TOATE CARDURILE NOI GENERATE -->
+    <div id="notes-wrapper"></div>
+</div>
+
+<script>
+    const sbUrl = 'supabase.co';
+    const sbKey = 'sb_publishable_horRgs5_HGfPpHoP9uRF7w_l2t08kX6';
+    
+    const userEmail = localStorage.getItem('loggedUserEmail');
+    const userId = localStorage.getItem('loggedUserId');
+
+    if (!userEmail || localStorage.getItem('userSession') !== 'active') {
+        window.location.href = 'index.html';
+    } else {
+        document.getElementById('user-email-display').innerText = userEmail;
+        loadSavedNotes();
+    }
+
+    function validateWordCount(textarea) {
+        const text = textarea.value.trim();
+        const words = text ? text.split(/\s+/) : [];
+        if (words.length > 100) {
+            const trimmedWords = words.slice(0, 100);
+            textarea.value = trimmedWords.join(" ");
+        }
+    }
+
+    function getNotesFromStorage() {
+        const stored = localStorage.getItem(`notes_list_${userId}`);
+        return stored ? JSON.parse(stored) : [];
+    }
+
+    function savePersonalNote() {
+        const titleInput = document.getElementById('note-title');
+        const textarea = document.getElementById('note-text');
+        
+        const titleValue = titleInput.value.trim() || "Notiță fără titlu";
+        const textValue = textarea.value.trim();
+
+        if (!textValue) {
+            alert("Te rugăm să scrii un text înainte de a salva.");
+            return;
+        }
+
+        const notes = getNotesFromStorage();
+        const newNote = { id: Date.now(), title: titleValue, text: textValue };
+        notes.push(newNote);
+
+        localStorage.setItem(`notes_list_${userId}`, JSON.stringify(notes));
+        
+        renderNotes(notes);
+        
+        titleInput.value = "";
+        textarea.value = "";
+        alert("Ce ai scris a fost salvat cu succes!");
+    }
+
+    function loadSavedNotes() {
+        const notes = getNotesFromStorage();
+        renderNotes(notes);
+    }
+
+    function renderNotes(notes) {
+        const wrapper = document.getElementById('notes-wrapper');
+        wrapper.innerHTML = "";
+
+        notes.slice().reverse().forEach(note => {
+            const cardNode = document.createElement('div');
+            cardNode.className = 'payment-card';
+            cardNode.style.maxWidth = '450px';
+            cardNode.style.marginBottom = '20px';
+            cardNode.id = `note-card-${note.id}`;
+
+            cardNode.innerHTML = `
+                <h3 class="saved-note-title">${escapeHTML(note.title)}</h3>
+                <div class="saved-note-body">${escapeHTML(note.text)}</div>
+                <button onclick="deleteSingleNote(${note.id})" class="stripe-button" style="background-color: var(--stripe-blue); color: white; width: 100%;">
+                    Șterge ce ai scris
+                </button>
+            `;
+            wrapper.appendChild(cardNode);
+        });
+    }
+
+    // CORECȚIE: S-a reparat cuvântul cheie 'function' din numele funcției
+    function deleteSingleNote(noteId) {
+        if (confirm("Sigur doresti să ștergi ce ai scris ?")) {
+            let notes = getNotesFromStorage();
+            notes = notes.filter(n => n.id !== noteId);
+            localStorage.setItem(`notes_list_${userId}`, JSON.stringify(notes));
+            renderNotes(notes);
+        }
+    }
+
+    function escapeHTML(str) {
+        return str.replace(/[&<>'"]/g,
+            tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+        );
+    }
+
+    function handleDashboardLogout() {
+        localStorage.removeItem('userSession');
+        localStorage.removeItem('loggedUserEmail');
+        localStorage.removeItem('loggedUserId');
+        window.location.href = 'index.html';
+    }
+</script>
+
+</body>
+</html>

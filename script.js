@@ -53,75 +53,85 @@ function startup() {
 document.addEventListener('DOMContentLoaded', startup);
 
 // --- LOGICA DE AUTENTIFICARE ---
-function handleRegister() {
-    const email = document.getElementById('reg-email').value;
+async function handleRegister() {
+    const email = document.getElementById('reg-email').value.trim();
     const pass = document.getElementById('reg-pass').value;
     const passConfirm = document.getElementById('reg-pass-confirm').value;
 
     if (!email || !pass || !passConfirm) { alert("Te rugăm să completezi toate câmpurile."); return; }
     if (pass !== passConfirm) { alert("Parolele nu coincid!"); return; }
 
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + 15);
+    try {
+        const response = await fetch(`${sbUrl}/rest/v1/users_profiles`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': sbKey,
+                'Authorization': `Bearer ${sbKey}`,
+                'Prefer': 'return=representation'
+            },
+            // MODIFICAT: Trimitem doar email și password, fără profile_image
+            body: JSON.stringify({ email: email, password: pass })
+        });
 
-    const userData = { email: email, password: pass, expiresAt: expiryDate.getTime() };
-    localStorage.setItem('userAccount', JSON.stringify(userData));
-    localStorage.setItem('userSession', 'active');
-    
-    alert("Cont creat cu succes!");
-    window.location.href = 'index.html';
+        if (response.status === 201 || response.ok) {
+            alert("Cont creat cu succes!");
+            window.location.href = 'index.html';
+        } else {
+            const errData = await response.json().catch(() => ({}));
+            if(errData.code === "23505") {
+                alert("Acest email este deja înregistrat în baza de date.");
+            } else {
+                alert("Eroare la înscriere: " + (errData.message || response.statusText));
+            }
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Eroare de rețea la înscriere.");
+    }
 }
 
-function handleLogin() {
-    const emailInput = document.getElementById('login-email').value;
+async function handleLogin() {
+    const emailInput = document.getElementById('login-email').value.trim();
     const passInput = document.getElementById('login-pass').value;
-    const storedData = localStorage.getItem('userAccount');
 
-    if (!storedData) { alert("Nu există niciun cont înregistrat."); return; }
+    if (!emailInput || !passInput) { alert("Te rugăm să completezi ambele câmpuri."); return; }
 
-    const user = JSON.parse(storedData);
-    if (emailInput === user.email && passInput === user.password) {
-        localStorage.setItem('userSession', 'active');
-        startDashboard(user);
-    } else {
-        alert("Email sau parolă incorectă.");
+    try {
+        const res = await fetch(`${sbUrl}/rest/v1/users_profiles?email=eq.${encodeURIComponent(emailInput)}&password=eq.${encodeURIComponent(passInput)}&select=*`, {
+            method: 'GET',
+            headers: {
+                'apikey': sbKey,
+                'Authorization': `Bearer ${sbKey}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!res.ok) {
+            alert("Eroare la conectare cu baza de date.");
+            return;
+        }
+
+        const data = await res.json();
+        if (data && data.length > 0) {
+            const user = data[0]; // Extreagem primul utilizator găsit în tabelă
+            
+            localStorage.setItem('userSession', 'active');
+            localStorage.setItem('loggedUserEmail', user.email);
+            localStorage.setItem('loggedUserId', user.id);
+            
+            window.location.href = 'dashboard.html';
+        } else {
+            alert("Email sau parolă incorectă.");
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Eroare de conexiune la autentificare.");
     }
 }
 
 function startDashboard(user) {
-    const authCard = document.getElementById('auth-card');
-    if(!authCard) return;
-
-    const updateTimer = () => {
-        const now = new Date().getTime();
-        const distance = user.expiresAt - now;
-        if (distance < 0) { handleLogout(); return; }
-
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-        const timerElement = document.getElementById('countdown');
-        if(timerElement) timerElement.innerHTML = `${days}z ${hours}h ${minutes}m ${seconds}s`;
-    };
-
-    authCard.innerHTML = `
-        <h1>Salut,</h1>
-        <span class="price" style="font-size:16px">${user.email}</span>
-        <div style="background: #f0f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <p style="font-size: 13px; color: var(--text-dark); margin-bottom: 5px;">Timp rămas pentru colaborare:</p>
-            <div id="countdown" style="font-weight: 800; color: var(--stripe-blue); font-size: 20px;">--</div>
-        </div>
-        <p style="font-size: 12px; color: var(--text-light); line-height: 1.4; text-align: center;">
-            Aveți 15 zile la dispoziție sa găsiți un client. Success ! Acest cont se va șterge automat după acesta perioada.
-        </p>
-        <button onclick="handleLogout()" class="stripe-button" style="margin-top:10px">Logout</button>
-    `;
-
-    setInterval(updateTimer, 1000);
-    updateTimer();
-    applySettings(false);
+    window.location.href = 'dashboard.html';
 }
 
 function handleLogout() {
