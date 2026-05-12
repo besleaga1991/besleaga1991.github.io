@@ -413,32 +413,133 @@ function disableButtonVisuals(btn) {
     btn.disabled = true;
 }
 
+// Funcție pentru a citi cifra reală din DB
 async function fetchGlobalClicks() {
     const display = document.getElementById('click-display');
     if (!display) return;
 
     try {
-        // Căutăm rândul unde name este 'main_card_clicks'
+        // Luăm cifra proaspătă
         const res = await fetch(`${sbUrl}/rest/v1/stats?name=eq.main_card_clicks&select=click_count`, {
-            method: 'GET',
             headers: {
                 'apikey': sbKey,
                 'Authorization': `Bearer ${sbKey}`,
-                'Content-Type': 'application/json'
+                'Cache-Control': 'no-cache' // Prevenim cache-ul browserului
             }
         });
 
         const data = await res.json();
         
-        // Dacă am primit date, actualizăm cifra pe ecran
+        // Supabase returnează un array, ex: [{click_count: 5}]
         if (data && data.length > 0) {
             display.innerText = data[0].click_count;
-            console.log("Cifră actualizată de pe server:", data[0].click_count);
+        } else {
+            display.innerText = "0";
         }
     } catch (e) {
-        console.error("Eroare la sincronizarea live:", e);
+        console.error("Eroare la citire cifra:", e);
     }
 }
+
+// Funcția de înregistrare (fără Local Storage)
+async function handleCounterClick() {
+    const btn = document.getElementById('counter-button');
+    const display = document.getElementById('click-display');
+    const nameInput = document.getElementById('visitor-name');
+    const nameVal = nameInput ? nameInput.value.trim() : "";
+
+    if (nameVal.length < 3) {
+        alert("Te rugăm să introduci numele complet.");
+        return;
+    }
+
+    btn.innerText = "Se trimite...";
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(`${sbUrl}/rest/v1/rpc/increment_clicks`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': sbKey,
+                'Authorization': `Bearer ${sbKey}`
+            },
+            body: JSON.stringify({
+                row_name: 'main_card_clicks',
+                visitor_name_input: nameVal
+            })
+        });
+
+        if (response.ok) {
+            // Succes: Cerem cifra nouă de la server pentru a o afișa
+            await fetchGlobalClicks();
+            disableButtonVisuals(btn);
+            alert("Înregistrare reușită!");
+        } else {
+            // Dacă SQL-ul a dat eroare (nume duplicat)
+            alert("Acest nume a fost deja înregistrat în baza de date.");
+            btn.innerText = "Inregistrare";
+            btn.disabled = false;
+        }
+    } catch (err) {
+        console.error(err);
+        btn.innerText = "Eroare rețea";
+        btn.disabled = false;
+    }
+}
+
+// Pornire automată la încărcare
+document.addEventListener('DOMContentLoaded', () => {
+    fetchGlobalClicks();
+});
+
+
+async function handleCounterClick() {
+    const btn = document.getElementById('counter-button');
+    const display = document.getElementById('click-display');
+    const nameVal = document.getElementById('visitor-name').value.trim();
+
+    if (nameVal.length < 3) {
+        alert("Introdu numele complet!");
+        return;
+    }
+
+    btn.innerText = "Se înregistrează...";
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(`${sbUrl}/rest/v1/rpc/increment_clicks`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': sbKey,
+                'Authorization': `Bearer ${sbKey}`
+            },
+            body: JSON.stringify({
+                row_name: 'main_card_clicks',
+                visitor_name_input: nameVal
+            })
+        });
+
+        if (response.ok) {
+            // Dacă salvarea în DB a reușit:
+            localStorage.setItem('hasClicked', 'true');
+            disableButtonVisuals(btn);
+            
+            // Forțăm o citire imediată pentru a vedea noul număr (0 devine 1, etc.)
+            await fetchGlobalClicks();
+        } else {
+            alert("Acest nume a fost deja folosit!");
+            btn.innerText = "Inregistrare";
+            btn.disabled = false;
+        }
+    } catch (err) {
+        alert("Eroare de rețea!");
+        btn.disabled = false;
+    }
+}
+
+
 
 // Pornim citirea imediat ce se încarcă pagina
 document.addEventListener('DOMContentLoaded', fetchGlobalClicks);
