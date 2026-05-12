@@ -418,6 +418,7 @@ async function fetchGlobalClicks() {
     if (!display) return;
 
     try {
+        // Căutăm rândul unde name este 'main_card_clicks'
         const res = await fetch(`${sbUrl}/rest/v1/stats?name=eq.main_card_clicks&select=click_count`, {
             method: 'GET',
             headers: {
@@ -428,17 +429,26 @@ async function fetchGlobalClicks() {
         });
 
         const data = await res.json();
+        
+        // Dacă am primit date, actualizăm cifra pe ecran
         if (data && data.length > 0) {
             display.innerText = data[0].click_count;
+            console.log("Cifră actualizată de pe server:", data[0].click_count);
         }
     } catch (e) {
-        console.error("Sincronizare eșuată:", e);
+        console.error("Eroare la sincronizarea live:", e);
     }
 }
+
+// Pornim citirea imediat ce se încarcă pagina
+document.addEventListener('DOMContentLoaded', fetchGlobalClicks);
+// Verificăm la fiecare 5 secunde dacă a mai dat cineva click
+setInterval(fetchGlobalClicks, 5000);
 
 async function handleCounterClick() {
     const btn = document.getElementById('counter-button');
     const display = document.getElementById('click-display');
+    const nameVal = document.getElementById('visitor-name').value.trim(); // Luăm numele pentru condiție
 
     if (btn.disabled || localStorage.getItem('hasClicked')) return;
 
@@ -453,26 +463,30 @@ async function handleCounterClick() {
                 'apikey': sbKey,
                 'Authorization': `Bearer ${sbKey}`
             },
-            body: JSON.stringify({ row_name: 'main_card_clicks' })
+            body: JSON.stringify({
+                row_name: 'main_card_clicks',
+                visitor_name_input: nameVal // Numele condiționează click-ul în SQL
+            })
         });
 
         if (response.ok) {
+            // Actualizăm cifra pe ecran (se afișează DOAR numărul)
             const currentVal = parseInt(display.innerText) || 0;
             display.innerText = currentVal + 1;
 
-            // Salvează în local storage și blochează butonul
             localStorage.setItem('hasClicked', 'true');
             disableButtonVisuals(btn);
         } else {
-            btn.innerText = "Eroare!";
+            alert("Acest nume a fost deja folosit pentru înregistrare.");
+            btn.innerText = "Inregistrare";
             btn.disabled = false;
         }
     } catch (err) {
-        console.error(err);
         btn.innerText = "Eroare rețea";
         btn.disabled = false;
     }
 }
+
 
 // Inițializare la încărcarea paginii
 document.addEventListener('DOMContentLoaded', () => {
@@ -539,4 +553,73 @@ async function saveLeadToDatabase() {
         btn.disabled = false;
     }
 }
+
+// Această funcție "deschide" butonul când se scrie numele
+function checkCounterEligibility() {
+    const nameInput = document.getElementById('visitor-name');
+    const btn = document.getElementById('counter-button');
+    
+    // Dacă numele are cel puțin 3 caractere, butonul se deschide
+    if (nameInput && nameInput.value.trim().length >= 3) {
+        btn.disabled = false;
+        btn.style.backgroundColor = "var(--stripe-blue)";
+        btn.style.color = "#ffffff"; // Adăugat: Text alb
+        btn.style.cursor = "pointer";
+    } else {
+        btn.disabled = true;
+        btn.style.backgroundColor = "#e6ebf1";
+        btn.style.color = "#ffffff"; // Adăugat: Text alb
+        btn.style.cursor = "not-allowed";
+    }
+}
+
+async function handleCounterClick() {
+    const btn = document.getElementById('counter-button');
+    const display = document.getElementById('click-display');
+    const nameInput = document.getElementById('visitor-name');
+    const nameVal = nameInput ? nameInput.value.trim() : "";
+
+    // IMPORTANT: Nu lăsăm funcția să plece fără nume
+    if (nameVal.length < 3) {
+        alert("Te rugăm să introduci numele complet.");
+        return;
+    }
+
+    btn.innerText = "Se trimite...";
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(`${sbUrl}/rest/v1/rpc/increment_clicks`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': sbKey,
+                'Authorization': `Bearer ${sbKey}`
+            },
+            body: JSON.stringify({
+                row_name: 'main_card_clicks',
+                visitor_name_input: nameVal
+            })
+        });
+
+        if (response.ok) {
+            // Actualizăm cifra direct pe site
+            const currentVal = parseInt(display.innerText) || 0;
+            display.innerText = currentVal + 1;
+            
+            localStorage.setItem('hasClicked', 'true');
+            disableButtonVisuals(btn);
+        } else {
+            // Aici intră dacă SQL-ul a găsit numele deja în tabel
+            alert("Acest nume a fost deja înregistrat în baza noastră de date.");
+            btn.innerText = "Inregistrare";
+            btn.disabled = false;
+        }
+    } catch (err) {
+        console.error(err);
+        btn.innerText = "Eroare rețea";
+        btn.disabled = false;
+    }
+}
+
 

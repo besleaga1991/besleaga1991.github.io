@@ -13,12 +13,15 @@
     <!-- Card Comunitate (Contor Global) -->
     <div class="payment-card" id="counter-card" style="margin-bottom: 20px;">
         <h1>Click-uri</h1>
-        <!-- Aici vor apărea cele 7 click-uri din Supabase -->
         <span class="price" id="click-display">0</span>
-        <p style="color: var(--text-light); margin-bottom: 20px;"></p>
         
-        <button id="counter-button" onclick="handleCounterClick()" class="stripe-button">Inregistrare</button>
+        <!-- Input pentru nume (condiția de deblocare) -->
+        <input type="text" id="visitor-name" placeholder="Nume și Prenume" class="form-input" style="margin-bottom: 15px;" oninput="checkCounterEligibility()">
+        
+        <!-- Butonul începe ca fiind blocat (disabled) -->
+        <button id="counter-button" onclick="handleCounterClick()" class="stripe-button" disabled style="background-color: #e6ebf1; cursor: not-allowed;">Inregistrare</button>
     </div>
+
 
     <!-- Card Conținut cu efect de Reveal -->
     <div class="card-reveal-container" id="reveal-wrapper">
