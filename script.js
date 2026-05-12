@@ -419,27 +419,99 @@ async function fetchGlobalClicks() {
     if (!display) return;
 
     try {
-        // Luăm cifra proaspătă
         const res = await fetch(`${sbUrl}/rest/v1/stats?name=eq.main_card_clicks&select=click_count`, {
+            method: 'GET',
             headers: {
                 'apikey': sbKey,
                 'Authorization': `Bearer ${sbKey}`,
-                'Cache-Control': 'no-cache' // Prevenim cache-ul browserului
+                'Content-Type': 'application/json'
             }
         });
 
         const data = await res.json();
         
-        // Supabase returnează un array, ex: [{click_count: 5}]
+        // Sincronizăm display-ul cu datele din array-ul Supabase
         if (data && data.length > 0) {
             display.innerText = data[0].click_count;
-        } else {
-            display.innerText = "0";
         }
     } catch (e) {
-        console.error("Eroare la citire cifra:", e);
+        console.error("Eroare la citire stats:", e);
     }
 }
+
+// 2. Funcția de înregistrare click
+async function handleCounterClick() {
+    const btn = document.getElementById('counter-button');
+    const nameInput = document.getElementById('visitor-name');
+    const nameVal = nameInput ? nameInput.value.trim() : "";
+
+    // Validare simplă
+    if (nameVal.length < 3) {
+        alert("Te rugăm să introduci numele complet.");
+        return;
+    }
+
+    btn.innerText = "Se trimite...";
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(`${sbUrl}/rest/v1/rpc/increment_clicks`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': sbKey,
+                'Authorization': `Bearer ${sbKey}`
+            },
+            body: JSON.stringify({
+                row_name: 'main_card_clicks', // Atenție: fără spații înainte sau după
+                visitor_name_input: nameVal
+            })
+        });
+
+        if (response.ok) {
+            // Dacă baza de date a acceptat click-ul, actualizăm imediat cifra pe ecran
+            await fetchGlobalClicks();
+            
+            // Schimbăm aspectul butonului (fără să salvăm în localStorage)
+            btn.innerText = "Înregistrat";
+            btn.style.backgroundColor = "#e6ebf1";
+            btn.style.color = "#aab7c4";
+            btn.style.cursor = "not-allowed";
+        } else {
+            // Aici intră dacă numele există deja în click_logs (UNIQUE constraint)
+            alert("Acest nume a fost deja înregistrat.");
+            btn.innerText = "Inregistrare";
+            btn.disabled = false;
+        }
+    } catch (err) {
+        console.error("Eroare la trimitere:", err);
+        btn.innerText = "Eroare rețea";
+        btn.disabled = false;
+    }
+}
+
+// 3. Pornire la încărcare pagină
+document.addEventListener('DOMContentLoaded', () => {
+    fetchGlobalClicks();
+});
+
+// 3. Funcția vizuală (obligatorie pentru a nu da eroare)
+function disableButtonVisuals(btn) {
+    if (!btn) return;
+    btn.innerText = "Înregistrat";
+    btn.style.backgroundColor = "#e6ebf1";
+    btn.style.color = "#aab7c4";
+    btn.style.cursor = "not-allowed";
+    btn.disabled = true;
+}
+
+// 4. Pornire la încărcarea paginii
+document.addEventListener('DOMContentLoaded', () => {
+    fetchGlobalClicks();
+});
+
+// Sincronizare automată la fiecare 10 secunde (opțional)
+setInterval(fetchGlobalClicks, 10000);
 
 // Funcția de înregistrare (fără Local Storage)
 async function handleCounterClick() {
