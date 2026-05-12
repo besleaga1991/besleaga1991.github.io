@@ -120,7 +120,7 @@ async function handleLogin() {
             localStorage.setItem('loggedUserEmail', user.email);
             localStorage.setItem('loggedUserId', user.id);
             
-            window.location.href = 'dashboard.html';
+            window.location.href = 'colaborator.html';
         } else {
             alert("Email sau parolă incorectă.");
         }
@@ -130,9 +130,10 @@ async function handleLogin() {
     }
 }
 
-function startDashboard(user) {
-    window.location.href = 'dashboard.html';
+function startColaborator(user) {
+    window.location.href = 'colaborator.html';
 }
+
 
 function handleLogout() {
     localStorage.removeItem('userSession');

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .input-field {
+            border: 1px solid #e6ebf1;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: inherit;
+            outline: none;
+        }
+        .form-label {
+            display: block;
+            text-align: left;
+            font-size: 13px;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        /* Stilul mic și gri solicitat */
+        .info-text-small {
+            color: var(--text-light);
+            font-size: 12px;
+            max-width: 400px;
+            text-align: center;
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <!-- PRIMUL CARD: Profilul Utilizatorului -->
+    <div class="payment-card" style="max-width: 450px; margin-bottom: 20px;">
+        <h1>Colaborator</h1>
+        <span class="price" id="user-email-display" style="font-size: 16px; margin-bottom: 25px;">Incarcare...</span>
+        
+        <button onclick="handleDashboardLogout()" class="stripe-button" style="background-color: var(--stripe-blue); color: white; margin-top: 10px;">
+            Log out
+        </button>
+    </div>
+
+    <!-- AL DOILEA CARD: Date Transfer -->
+    <div class="payment-card" style="max-width: 450px;">
+        <h2>Transfer</h2>
+        
+        <label class="form-label">Nume</label>
+        <input type="text" id="bank-nume" class="input-field" placeholder="Introduceți numele...">
+
+        <label class="form-label">Prenume</label>
+        <input type="text" id="bank-prenume" class="input-field" placeholder="Introduceți prenumele...">
+
+        <label class="form-label">E-mail</label>
+        <input type="email" id="bank-email" class="input-field" placeholder="Introduceți e-mailul...">
+
+        <label class="form-label">IBAN</label>
+        <input type="text" id="bank-iban" class="input-field" placeholder="Introduceți codul IBAN...">
+        
+        <button onclick="saveTransferData()" class="stripe-button" style="background-color: var(--stripe-blue); color: white; width: 100%; margin-top: 10px;">
+            Trimite datele
+        </button>
+    </div>
+
+    <!-- Textul mic si gri ca la inscriere -->
+    <p class="info-text-small">
+        Dacă ai găsit client completează acest formular pentru transfer-ul bancar pentru cei 600 RON.
+    </p>
+</div>
+
+<script>
+    const sbUrl = 'https://bsybhrxzkdrwsewjolcy.supabase.co';
+    const sbKey = 'sb_publishable_horRgs5_HGfPpHoP9uRF7w_l2t08kX6';
+    
+    const userEmail = localStorage.getItem('loggedUserEmail');
+    const userId = localStorage.getItem('loggedUserId');
+
+    if (!userEmail || localStorage.getItem('userSession') !== 'active') {
+        window.location.href = 'index.html';
+    } else {
+        document.getElementById('user-email-display').innerText = userEmail;
+    }
+
+    async function saveTransferData() {
+        const nume = document.getElementById('bank-nume').value.trim();
+        const prenume = document.getElementById('bank-prenume').value.trim();
+        const email = document.getElementById('bank-email').value.trim();
+        const iban = document.getElementById('bank-iban').value.trim();
+
+        if (!nume || !prenume || !email || !iban) {
+            alert("Te rugăm să completezi toate câmpurile.");
+            return;
+        }
+
+        const rawData = {
+            colaborator_id: userId,
+            nume: nume,
+            prenume: prenume,
+            email_contact: email,
+            iban: iban,
+            suma: 600
+        };
+
+        try {
+            const response = await fetch(`${sbUrl}/rest/v1/transferuri_fonduri`, {
+                method: 'POST',
+                headers: {
+                    'apikey': sbKey,
+                    'Authorization': `Bearer ${sbKey}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify(rawData)
+            });
+
+            if (response.ok) {
+                alert("Datele au fost trimise cu succes!");
+                document.querySelectorAll('.input-field').forEach(input => input.value = "");
+            } else {
+                alert("Eroare la salvarea datelor.");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Problemă de conexiune.");
+        }
+    }
+
+    function handleDashboardLogout() {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
+</script>
+
+</body>
+</html>
