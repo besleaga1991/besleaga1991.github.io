@@ -142,56 +142,41 @@ function handleLogout() {
 
 function applySettings(shouldSave = true) {
     const toggles = document.querySelectorAll('#main-toggles input');
-    
-    // Selectăm elementele exact în ordinea toggle-urilor din interfață
-    const elementsToToggle = [
-        document.getElementById('reveal-wrapper'), // 1. Website Conținut + Iconițe
-        document.querySelector('.payment-card:not(#auth-card):not(#offline-card):nth-of-type(2)'), // 2. Website Basic
-        document.querySelector('.payment-card:not(#auth-card):not(#offline-card):nth-of-type(3)'), // 3. Curriculum Vitae
-        document.getElementById('auth-card') // 4. Colaborare
-    ];
-
-    // Dacă selecția de mai sus e fragilă, folosim căutarea prin text (Fallback)
     const allCards = document.querySelectorAll('.payment-card');
-    const basicCard = Array.from(allCards).find(c => c.innerText.includes('3.000,00 RON')) || elementsToToggle;
-    const cvCard = Array.from(allCards).find(c => c.innerText.includes('25,00 RON')) || elementsToToggle;
+    
+    // Identificăm cardurile exact după textul din interiorul lor
+    const basicCard = Array.from(allCards).find(c => c.innerText.includes('3.000,00 RON'));
+    const cvCard = Array.from(allCards).find(c => c.innerText.includes('25,00 RON'));
 
+    // Structura exactă a celor 4 elemente controlate de toggle-uri
     const finalElements = [
-        document.getElementById('reveal-wrapper'),
-        basicCard,
-        cvCard,
-        document.getElementById('auth-card')
+        document.getElementById('reveal-wrapper'), // 1. Website Conținut
+        basicCard,                                 // 2. Website Basic
+        cvCard,                                    // 3. Curriculum Vitae
+        document.getElementById('auth-card')       // 4. Colaborare
     ];
 
-    const offlineCard = document.getElementById('offline-card');
     const footer = document.querySelector('.footer-links');
 
     if (!toggles || toggles.length === 0) return;
 
     let states = [];
-    let anyActive = false;
 
+    // Această buclă citește starea fiecărui comutator și ascunde/afișează cardul respectiv
     toggles.forEach((t, i) => {
-        states.push(t.checked); // Colectăm starea pentru salvare
+        states.push(t.checked); // SALVEAZĂ STAREA (linia care lipsea)
         if (finalElements[i]) {
             finalElements[i].style.display = t.checked ? 'flex' : 'none';
-            if (t.checked) anyActive = true;
         }
     });
 
-    // SALVARE ÎN LOCAL STORAGE (Forțată)
+    // Salvare în memoria browserului
     if (shouldSave) {
         localStorage.setItem('siteSettings', JSON.stringify(states));
     }
 
-    // Logica ecranului Offline
-    if (!anyActive) {
-        if (offlineCard) offlineCard.style.display = 'flex';
-        if (footer) footer.style.display = 'none';
-    } else {
-        if (offlineCard) offlineCard.style.display = 'none';
-        if (footer) footer.style.display = 'block';
-    }
+    // Subsolul rămâne mereu activ, conform cerinței tale (fără blocare offline)
+    if (footer) footer.style.display = 'block';
 }
 
 function toggleCard(index, checkbox) { applySettings(true); }

@@ -101,3 +101,45 @@ input:checked + .slider:before { transform: translateX(18px); }
     box-sizing: border-box; margin-bottom: 12px; font-size: 14px; background-color: #fcfdfd; transition: all 0.2s ease;
 }
 .form-input:focus { border-color: var(--stripe-blue); background-color: #ffffff; box-shadow: 0 1px 3px rgba(50,50,93,.05); outline: none; }
+
+/* --- OPTIMIZARE STRUCTURĂ ȘI MARGINI PENTRU MACOS / DESKTOP --- */
+@media screen and (min-width: 769px) {
+    /* Eliminăm spațiul lateral exterior pentru ca fundalurile să atingă marginile ecranului */
+    .wrapper {
+        padding: 20px 0px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* Cardurile ating marginile și au colțuri drepte, dar păstrează alinierea originală în interior */
+    .payment-card:not(#settings-card):not(#legal-settings-card) {
+        max-width: 100% !important;
+        width: 100% !important;
+        border-radius: 0px !important; /* Colțuri perfect drepte */
+        box-shadow: 0 15px 35px rgba(50,50,93,.1), 0 5px 15px rgba(0,0,0,.07) !important; /* Păstrăm umbrele originale */
+        
+        /* Forțăm conținutul din interior să rămână centrat și compact ca pe iPhone */
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Containerul de reveal atinge și el marginile ecranului */
+    .card-reveal-container {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    /* Forțăm elementele din interiorul cardurilor să nu se întindă pe tot ecranul, */
+    /* ci să își păstreze lățimea maximă inițială de mobil (400px) și centrarea perfectă */
+    .payment-card:not(#settings-card):not(#legal-settings-card) > * {
+        max-width: 400px !important;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    /* Protejăm elementul special de Reveal (GitHub/Stripe) să rămână legat corect de zona de text */
+    #content-card {
+        max-width: 400px !important;
+        margin: 0 auto !important;
+    }
+}
