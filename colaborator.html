@@ -24,7 +24,6 @@
             font-weight: 600;
             color: var(--text-dark);
         }
-        /* Stilul mic și gri solicitat */
         .info-text-small {
             color: var(--text-light);
             font-size: 12px;
@@ -49,7 +48,7 @@
     </div>
 
     <!-- AL DOILEA CARD: Date Transfer -->
-    <div class="payment-card" style="max-width: 450px;">
+    <div class="payment-card" style="max-width: 450px; margin-bottom: 20px;">
         <h2>Transfer</h2>
         
         <label class="form-label">Nume</label>
@@ -66,6 +65,19 @@
         
         <button onclick="saveTransferData()" class="stripe-button" style="background-color: var(--stripe-blue); color: white; width: 100%; margin-top: 10px;">
             Trimite datele
+        </button>
+    </div>
+
+    <!-- INTEGRAT: AL TREILEA CARD: Control Profil Public / Ștergere Pagină -->
+    <div class="payment-card" style="max-width: 450px;">
+        <h2>Setări Profil Public</h2>
+        <span class="price" style="font-size: 16px; margin-bottom: 15px;">Fișier Indexat</span>
+        <p style="color: var(--text-light); font-size: 13px; text-align: left; line-height: 1.5; margin-bottom: 20px;">
+            Eliminarea paginii va dezactiva definitiv codul de recomandare Google Graph asociat numelui dumneavoastră.
+        </p>
+        
+        <button id="delete-page-btn" onclick="deleteUserPage()" class="stripe-button" style="background-color: #6772e5; color: white; width: 100%;">
+            Șterge pagina ta
         </button>
     </div>
 
@@ -86,6 +98,30 @@
         window.location.href = 'index.html';
     } else {
         document.getElementById('user-email-display').innerText = userEmail;
+        // Preluăm dinamic slug-ul din DB la autentificare/încărcare dacă lipsește din stocare
+        if (!localStorage.getItem('userPageSlug')) {
+            fetchUserSlug();
+        }
+    }
+
+    // Funcție pentru extragerea numelui fișierului asignat utilizatorului din baza de date
+    async function fetchUserSlug() {
+        try {
+            const res = await fetch(`${sbUrl}/rest/v1/users_profiles?id=eq.${userId}&select=page_slug`, {
+                method: 'GET',
+                headers: {
+                    'apikey': sbKey,
+                    'Authorization': `Bearer ${sbKey}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await res.json();
+            if (data && data.length > 0 && data[0].page_slug) {
+                localStorage.setItem('userPageSlug', data[0].page_slug);
+            }
+        } catch (e) {
+            console.error("Eroare la obținerea slug-ului paginii:", e);
+        }
     }
 
     async function saveTransferData() {
@@ -129,6 +165,49 @@
         } catch (error) {
             console.error("Error:", error);
             alert("Problemă de conexiune.");
+        }
+    }
+
+    // INTEGRAT: Logica de ștergere a fișierului HTML fizic din Supabase Storage
+    async function deleteUserPage() {
+        const fileName = localStorage.getItem('userPageSlug');
+        if (!fileName) {
+            alert("Nu s-a găsit nicio pagină activă asociată contului dumneavoastră.");
+            return;
+        }
+
+        if (!confirm("Sigur doriți să ștergeți definitiv pagina dumneavoastră web?")) return;
+
+        const btnDelete = document.getElementById('delete-page-btn');
+        btnDelete.innerText = "Se șterge...";
+        btnDelete.disabled = true;
+
+        try {
+            const response = await fetch(`${sbUrl}/storage/v1/object/pagini-colaboratori/${fileName}`, {
+                method: 'DELETE',
+                headers: {
+                    'apikey': sbKey,
+                    'Authorization': `Bearer ${sbKey}`
+                }
+            });
+
+            if (response.ok) {
+                alert("Pagina ta a fost ștearsă cu succes de pe server!");
+                btnDelete.innerText = "Pagină Ștearsă";
+                btnDelete.style.backgroundColor = "#e6ebf1";
+                btnDelete.style.color = "#aab7c4";
+                btnDelete.style.cursor = "not-allowed";
+                localStorage.removeItem('userPageSlug');
+            } else {
+                alert("Eroare la ștergerea fișierului. Verificați dacă fișierul mai există.");
+                btnDelete.innerText = "Șterge pagina ta";
+                btnDelete.disabled = false;
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Eroare de rețea la încercarea de ștergere.");
+            btnDelete.innerText = "Șterge pagina ta";
+            btnDelete.disabled = false;
         }
     }
 

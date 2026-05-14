@@ -52,16 +52,21 @@ function startup() {
 
 document.addEventListener('DOMContentLoaded', startup);
 
-// --- LOGICA DE AUTENTIFICARE ---
 async function handleRegister() {
+    const fullName = document.getElementById('reg-name').value.trim();
     const email = document.getElementById('reg-email').value.trim();
     const pass = document.getElementById('reg-pass').value;
     const passConfirm = document.getElementById('reg-pass-confirm').value;
 
-    if (!email || !pass || !passConfirm) { alert("Te rugăm să completezi toate câmpurile."); return; }
+    if (!fullName || !email || !pass || !passConfirm) { alert("Te rugăm să completezi toate câmpurile."); return; }
     if (pass !== passConfirm) { alert("Parolele nu coincid!"); return; }
+    if (fullName.length < 3) { alert("Te rugăm să introduci numele tău complet."); return; }
+
+    const slug = fullName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').trim();
+    const fileName = `${slug}.html`;
 
     try {
+        // Pasul 1: Înregistrare profil în tabela Supabase
         const response = await fetch(`${sbUrl}/rest/v1/users_profiles`, {
             method: 'POST',
             headers: {
@@ -70,12 +75,139 @@ async function handleRegister() {
                 'Authorization': `Bearer ${sbKey}`,
                 'Prefer': 'return=representation'
             },
-            // MODIFICAT: Trimitem doar email și password, fără profile_image
-            body: JSON.stringify({ email: email, password: pass })
+            body: JSON.stringify({
+                name: fullName,
+                email: email,
+                password: pass,
+                page_slug: fileName
+            })
         });
 
         if (response.status === 201 || response.ok) {
-            alert("Cont creat cu succes!");
+            // Pasul 2: Structura HTML cu UN SINGUR CARD și FĂRĂ BUTON DE LOGOUT
+            const pageHtmlContent = `<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${fullName}</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f6f9fc !important;
+            color: #32325d !important;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        .wrapper {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .payment-card {
+            background: #ffffff !important;
+            border-radius: 8px !important;
+            box-shadow: 0 7px 14px rgba(50,50,93,.1), 0 3px 6px rgba(0,0,0,.08) !important;
+            padding: 40px 30px !important;
+            text-align: center;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e6ebf1;
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 22px;
+            font-weight: 600;
+            color: #32325d !important;
+            word-break: break-all;
+        }
+        .price {
+            font-size: 18px;
+            color: #6772e5 !important;
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .user-email {
+            font-size: 14px;
+            color: #6b7c93 !important;
+            margin-bottom: 25px;
+            display: block;
+        }
+        .support-text {
+            color: #424770 !important;
+            font-size: 15px;
+            text-align: center;
+            line-height: 1.6;
+            margin: 0;
+            background: #f8fbfd;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #6772e5;
+        }
+    </style>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Besleaga Alexandru Marian",
+      "jobTitle": "Programator",
+      "url": "github.io",
+      "sameAs": [
+        "facebook.com",
+        "youtube.com",
+        "github.com",
+        "supabase.co"
+      ]
+    }
+    <\/script>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="payment-card">
+        <h1>${fileName}</h1>
+        <span class="price">${fullName}</span>
+        <span class="user-email">${email}</span>
+        
+        <p class="support-text">
+            Mi-am făcut această pagină special pentru a-l susține pe programatorul <strong>Beșleaga Alexandru Marian</strong> și pentru a ajuta la declanșarea unui panou oficial <strong>Google Knowledge Graph</strong> asociat identității și activității sale profesionale în dezvoltarea de aplicații și website-uri de înaltă performanță.
+        </p>
+    </div>
+</div>
+
+</body>
+</html>`;
+
+            // Salvare directă ca fișier în storage bucket-ul public Supabase
+            const blob = new Blob([pageHtmlContent], { type: 'text/html;charset=utf-8' });
+            const uploadResponse = await fetch(`${sbUrl}/storage/v1/object/pagini-colaboratori/${fileName}`, {
+                method: 'POST',
+                headers: {
+                    'apikey': sbKey,
+                    'Authorization': `Bearer ${sbKey}`,
+                    'Content-Type': 'text/html',
+                    'x-upsert': 'true'
+                },
+                body: blob
+            });
+
+            if (uploadResponse.ok) {
+                alert("Cont creat și pagina ta de susținere Google Graph a fost generată cu succes în bucket!");
+            } else {
+                alert("Contul s-a creat, dar structura paginii nu a putut fi stocată în bucket.");
+            }
+            
             window.location.href = 'index.html';
         } else {
             const errData = await response.json().catch(() => ({}));
@@ -87,9 +219,48 @@ async function handleRegister() {
         }
     } catch (err) {
         console.error(err);
-        alert("Eroare de rețea la înscriere.");
+        alert("Eroare critică de rețea la înregistrare.");
     }
 }
+
+
+
+
+// --- LOGICĂ PENTRU BUTONUL VIOLET „ȘTERGE PAGINA TA” (Din dashboard-ul colaborator.html) ---
+async function deleteUserPage() {
+    const fileName = localStorage.getItem('userPageSlug'); // Salvat la autentificare în localStorage din user.page_slug
+    if (!fileName) { alert("Nu s-a găsit nicio pagină activă asociată contului dumneavoastră."); return; }
+
+    if (!confirm("Sigur doriți să ștergeți definitiv pagina dumneavoastră web? Această acțiune va elimina și validarea JSON-LD din Google.")) return;
+
+    try {
+        const response = await fetch(`${sbUrl}/storage/v1/object/pagini-colaboratori/${fileName}`, {
+            method: 'DELETE',
+            headers: {
+                'apikey': sbKey,
+                'Authorization': `Bearer ${sbKey}`
+            }
+        });
+
+        if (response.ok) {
+            alert("Pagina ta a fost ștearsă cu succes de pe server!");
+            // Opțional ascundem elementul din interfață sau reîncărcăm
+            const btnDelete = document.getElementById('delete-page-btn');
+            if(btnDelete) {
+                btnDelete.innerText = "Pagină Ștearsă";
+                btnDelete.disabled = true;
+                btnDelete.style.backgroundColor = "#e6ebf1";
+                btnDelete.style.color = "#aab7c4";
+            }
+        } else {
+            alert("Eroare la ștergerea fișierului de pe server. Este posibil să fi fost deja șters.");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Eroare de rețea la încercarea de ștergere.");
+    }
+}
+
 
 async function handleLogin() {
     const emailInput = document.getElementById('login-email').value.trim();
