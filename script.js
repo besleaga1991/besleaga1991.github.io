@@ -163,12 +163,12 @@ async function handleRegister() {
       "name": "Besleaga Alexandru Marian",
       "jobTitle": "Programator",
       "url": "github.io",
-      "sameAs": [
-        "facebook.com",
-        "youtube.com",
-        "github.com",
-        "supabase.co"
-      ]
+            "sameAs": [
+              "https://facebook.com/alex.m.besleaga.91",
+              "https://youtube.com/@91-Alex",
+              "https://github.com/besleaga1991",
+              "https://bsybhrxzkdrwsewjolcy.supabase.co"
+            ]
     }
     <\/script>
 </head>
