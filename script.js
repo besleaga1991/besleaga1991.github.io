@@ -374,6 +374,38 @@ function applyLegalVisibility(shouldSave = true) {
     if(shouldSave) localStorage.setItem('legalSettings', JSON.stringify(states));
 }
 
+// Controlul deschiderii listei de utilizatori (Optimizat pentru Click și Tap)
+function toggleUsersList() {
+    const list = document.getElementById('users-list-dropdown');
+    const trigger = document.getElementById('user-toggle-trigger');
+    
+    if (list.classList.contains('users-list-collapsed')) {
+        // Deschidere: Mutare în stânga, rotație 15 grade și afișare listă
+        list.classList.remove('users-list-collapsed');
+        list.classList.add('users-list-expanded');
+        trigger.classList.remove('circle-centered-state');
+        trigger.classList.add('circle-left-state');
+    } else {
+        // Închidere: Revenire pe centrul cardului și ascundere listă
+        list.classList.remove('users-list-expanded');
+        list.classList.add('users-list-collapsed');
+        trigger.classList.remove('circle-left-state');
+        trigger.classList.add('circle-centered-state');
+    }
+}
+
+// Asigură eliminarea întârzierii de 300ms la tap pe ecranele tactile de mobil
+document.addEventListener("DOMContentLoaded", function() {
+    const triggerBtn = document.getElementById('user-toggle-trigger');
+    if (triggerBtn) {
+        triggerBtn.addEventListener('touchstart', function(e) {
+            e.preventDefault(); // Previne declanșarea dublă (tap + click fals)
+            toggleUsersList();
+        }, { passive: false });
+    }
+});
+
+
 // --- TOATE TEXTELE LEGALE INTACTE ---
 async function showLegal(type) {
     const modal = document.getElementById('legalModal');
