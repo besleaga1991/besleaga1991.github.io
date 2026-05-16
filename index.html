@@ -4,22 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Website</title>
-    <meta name="google-site-verification" content="NNYIyi4tyH5eQtjojJa9mj2QcVJA9tr81SBtkfYRKBA" />
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Besleaga Alexandru Marian",
-      "jobTitle": "Programator",
-      "url": "https://besleaga1991.github.io",
-      "sameAs": [
-        "https://facebook.com/alex.m.besleaga.91",
-        "https://youtube.com/@91-Alex",
-        "https://github.com/besleaga1991",
-        "https://bsybhrxzkdrwsewjolcy.supabase.co"
-      ]
-    }
-    </script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -100,32 +84,10 @@
         <a href="inscriere.html" style="color: var(--text-light); font-size: 13px; text-decoration: underline; text-align: center; display: block;">Înscriere</a>
     </div>
     
-    <!-- Card Colaborare - Fără efecte de Hover -->
-    <div class="payment-card" style="margin-top: 20px; transition: all 0.4s ease-in-out;" id="users-card">
-        <h1>Colaborare</h1>
-        <span class="price">Utilizator</span>
-        
-        <!-- Containerul principal pentru aliniere stânga-dreapta -->
-        <div class="users-adaptive-layout">
-            
-            <!-- Iconița Stripe Mică (Rotație 15 grade la click) -->
-            <div id="user-toggle-trigger" class="user-toggle-circle circle-centered-state" onclick="toggleUsersList()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="8.5" cy="7" r="4"></circle>
-                    <polyline points="17 11 19 13 23 9"></polyline>
-                </svg>
-            </div>
-
-            <!-- Lista de Utilizatori (Fixă, Litere MARI, fără chenar, cu stegulețe violet) -->
-            <div id="users-list-dropdown" class="users-list-collapsed">
-                <a href="besleaga-alexandru-marian.html" class="user-link-item">Besleaga Alexandru Marian</a>
-                <a href="alexandru-marin.html" class="user-link-item">Alexandru Marin</a>
-                <a href="braun-adrian.html" class="user-link-item">Braun Adrian</a>
-                <a href="calin-mioara.html" class="user-link-item">Calin Mioara</a>
-            </div>
-
-        </div>
+    <div id="offline-card" class="payment-card" style="display: none; border-top: 4px solid var(--stripe-blue); margin-top: 20px;">
+        <h1>Website Offline</h1>
+        <p style="color: var(--text-light); line-height: 1.6;">Site-ul este inactiv conform setărilor.</p>
+        <p style="font-size: 12px; color: #aab7c4; margin-top: 10px; font-style: italic;">În cazul în care nu sunteți de acord cu acești termeni sau nu doriți să finalizați comanda pentru un site funcțional, aveți opțiunea de a trece site-ul în modul offline.</p>
     </div>
 
     <div id="settings-card" class="payment-card" style="display: none; margin-top: 20px; border: 1px solid var(--line-color);">
